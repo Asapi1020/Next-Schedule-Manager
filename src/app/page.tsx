@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import GasApi from "./lib/gasApi";
+import GasApi from "@/lib/gasApi";
 
 const Home = () => {
 	const [data, setData] = useState<string>("");
