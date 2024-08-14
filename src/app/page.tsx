@@ -1,34 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-import GasApi from "@/lib/gasApi";
+import { LoginButton } from "@/components/LoginButton";
 
 const Home = () => {
-	const [data, setData] = useState<string>("");
-	const gasApi = new GasApi();
-
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const data = await gasApi.execGas("myFunction");
-				console.log(data);
-				if (data.error) {
-					throw new Error(`Error GAS: ${data.error.message}`);
-				}
-				setData(data.response.result);
-			} catch (error) {
-				console.error("Error fetching data:", error);
-			}
-		};
-
-		fetchData();
-	}, []);
-
 	return (
-		<div>
-			<h1>Data from Backend</h1>
-			{data ? <p>{data}</p> : <p>Loading...</p>}
+		<div className="flex flex-col items-center justify-center min-h-screen">
+			<h1 className="text-4xl font-bold mb-4">Schedule Manager</h1>
+			<p className="text-lg text-gray-700 mb-8">
+				Manage your schedules for discord community.
+			</p>
+			<LoginButton label="Login with Discord" />
 		</div>
 	);
 };

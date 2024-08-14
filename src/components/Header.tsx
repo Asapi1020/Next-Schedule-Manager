@@ -7,7 +7,7 @@ export const Header = () => {
 				<img src="../favicon.ico" alt="" className="w-8 h-8" />
 			</div>
 			<h1 className="text-xl font-bold">Schedule Manager</h1>
-			<div className="px-4 py-2 text-black bg-white rounded hover:bg-gray-200">
+			<div>
 				<UserButton></UserButton>
 			</div>
 		</header>

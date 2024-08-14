@@ -31,3 +31,45 @@ body {
     text-wrap: balance;
   }
 }
+
+.discord-login-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #5865F2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  overflow: hidden;
+  position: relative;
+}
+
+.discord-login-button:hover {
+  background-color: #4752C4;
+}
+
+.discord-login-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: all 0.6s;
+}
+
+.discord-login-button:hover::before {
+  left: 100%;
+}
