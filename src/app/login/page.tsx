@@ -53,7 +53,7 @@ function ObtainLogin() {
 		};
 
 		handleLogin();
-	}, [searchParams, router, gasApi, setCookie]);
+	}, []);
 
 	return <></>;
 }
