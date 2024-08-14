@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCookies } from "react-cookie";
 
 import { LoginButton } from "./LoginButton";
+import "@/styles/discord.css";
 
 export const UserButton = () => {
 	const [cookies] = useCookies<string>();
