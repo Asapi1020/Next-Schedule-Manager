@@ -6,6 +6,7 @@ const nextConfig = {
 		GAS_REFRESH_TOKEN: process.env.GAS_REFRESH_TOKEN,
 		GAS_SCRIPT_ID: process.env.GAS_SCRIPT_ID,
 		DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID,
+		DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
 		NEXT_PUBLIC_FRONTEND_ADDRESS: process.env.NEXT_PUBLIC_FRONTEND_ADDRESS,
 	},
 	reactStrictMode: false,

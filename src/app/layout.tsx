@@ -25,7 +25,7 @@ export default function RootLayout({
 		<html lang="ja">
 			<body className={inter.className}>
 				<Header></Header>
-				<Suspense fallback={<div>読み込み中...</div>}>{children}</Suspense>
+				<Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
 			</body>
 		</html>
 	);

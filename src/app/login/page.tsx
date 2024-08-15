@@ -3,13 +3,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { useCookies } from "react-cookie";
 
-import GasApi from "@/lib/gasApi";
+import { signInWithDiscord } from "@/lib/fetch";
 
 function ObtainLogin() {
 	const [, setCookie] = useCookies(["access_token"]);
 	const router = useRouter();
 	const searchParams = useSearchParams();
-	const gasApi = new GasApi();
 
 	useEffect(() => {
 		const handleLogin = async () => {
@@ -19,34 +18,25 @@ function ObtainLogin() {
 				return;
 			}
 
-			const data = await gasApi.execGas("signInWithDiscord", [code]);
-			console.log({
-				login_try: data,
-			});
-			if (data.error) {
-				router.push("/");
-				throw new Error(`Error GAS: ${data.error.message}`);
-			}
+			const response = await signInWithDiscord(code);
 
-			const result = data.response.result;
-			console.log(result);
-			if (result.statusCode === 200) {
-				const accessToken = result.payload;
+			if (response.status === 200) {
+				const accessToken = await response.json();
 				setCookie("access_token", accessToken, {
 					path: "/",
 				});
 				router.push("/");
 				return;
 			}
-			if (result.statusCode === 400) {
+			if (response.status === 400) {
 				router.push("/");
 				throw new Error("Error OAuth: Bad Request");
 			}
-			if (result.statusCode === 401) {
+			if (response.status === 401) {
 				router.push("/");
 				throw new Error("Error OAuth: Unauthorized");
 			}
-			if (result.statusCode === 500) {
+			if (response.status === 500) {
 				router.push("/");
 				throw new Error("Error GAS: Internal Server Error");
 			}
