@@ -12,32 +12,37 @@ function ObtainLogin() {
 
 	useEffect(() => {
 		const handleLogin = async () => {
-			const code = searchParams?.get("code") ?? null;
-			if (!code) {
-				router.push("/");
-				return;
-			}
+			try {
+				const code = searchParams?.get("code") ?? null;
+				if (!code) {
+					router.push("/");
+					return;
+				}
 
-			const response = await signInWithDiscord(code);
+				const response = await signInWithDiscord(code);
 
-			if (response.status === 200) {
-				const { accessToken } = await response.json();
-				setCookie("access_token", accessToken, {
-					path: "/",
-				});
+				if (response.status === 200) {
+					const { accessToken } = await response.json();
+					setCookie("access_token", accessToken, {
+						path: "/",
+					});
+					router.push("/");
+					return;
+				} else {
+					router.push("/");
+					const { error } = await response.json();
+					throw new Error(error);
+				}
+			} catch (error) {
+				console.error("Login error", error);
 				router.push("/");
-				return;
-			} else {
-				router.push("/");
-				const { error } = await response.json();
-				throw new Error(error);
 			}
 		};
 
 		handleLogin();
 	}, [searchParams]);
 
-	return <></>;
+	return null;
 }
 
 export default function Home() {

@@ -3,6 +3,16 @@ import config from "./gasConfig";
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const apiUrl = `https://script.googleapis.com/v1/scripts/${config.scriptId}:run`;
 
+interface TokenResponse {
+	access_token: string;
+}
+
+function isTokenResponse(result: unknown): result is TokenResponse {
+	return (
+		typeof result === "object" && result !== null && "access_token" in result
+	);
+}
+
 async function getAccessToken() {
 	const data = {
 		client_id: config.clientId,
@@ -22,16 +32,23 @@ async function getAccessToken() {
 
 	const result = await response.json();
 
-	if (
-		typeof result === "object" &&
-		result !== null &&
-		"access_token" in result
-	) {
-		const { access_token } = result as { access_token: string };
-		return access_token;
+	if (isTokenResponse(result)) {
+		return result.access_token;
 	} else {
 		throw new Error("Failed to obtain access token.");
 	}
+}
+
+interface GasResponse {
+	response: {
+		result: {
+			statusCode: number;
+			message: string;
+		};
+	};
+	error?: {
+		message: string;
+	};
 }
 
 export default async function execGas(
@@ -61,7 +78,7 @@ export default async function execGas(
 		throw new Error(`HTTP error! status: ${response.status}`);
 	}
 
-	const responseData = await response.json();
+	const responseData: GasResponse = await response.json();
 	if (responseData.error) {
 		return {
 			statusCode: 500,
