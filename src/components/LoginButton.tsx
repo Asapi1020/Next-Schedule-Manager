@@ -1,3 +1,5 @@
+"use client";
+
 import DiscordLogo from "@public/discord.svg";
 import Image from "next/image";
 import React from "react";
@@ -7,7 +9,7 @@ interface CustomButtonProps {
 }
 
 const jump = () => {
-	const clientId = process.env.DISCORD_CLIENT_ID;
+	const clientId = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
 	const frontendAddress = process.env.NEXT_PUBLIC_FRONTEND_ADDRESS;
 
 	if (!clientId || !frontendAddress) {

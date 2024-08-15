@@ -1,3 +1,5 @@
+"use client";
+
 import Favicon from "@public/favicon.svg";
 import Image from "next/image";
 
