@@ -12,7 +12,7 @@ function ObtainLogin() {
 
 	useEffect(() => {
 		const handleLogin = async () => {
-			const code = searchParams.get("code") ?? null;
+			const code = searchParams?.get("code") ?? null;
 			if (!code) {
 				router.push("/");
 				return;
@@ -21,29 +21,21 @@ function ObtainLogin() {
 			const response = await signInWithDiscord(code);
 
 			if (response.status === 200) {
-				const accessToken = await response.json();
+				const { accessToken } = await response.json();
 				setCookie("access_token", accessToken, {
 					path: "/",
 				});
 				router.push("/");
 				return;
-			}
-			if (response.status === 400) {
+			} else {
 				router.push("/");
-				throw new Error("Error OAuth: Bad Request");
-			}
-			if (response.status === 401) {
-				router.push("/");
-				throw new Error("Error OAuth: Unauthorized");
-			}
-			if (response.status === 500) {
-				router.push("/");
-				throw new Error("Error GAS: Internal Server Error");
+				const { error } = await response.json();
+				throw new Error(error);
 			}
 		};
 
 		handleLogin();
-	}, []);
+	}, [searchParams]);
 
 	return <></>;
 }

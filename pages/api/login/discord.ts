@@ -1,36 +1,50 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { useSearchParams } from "next/navigation";
+
+import execGas from "../../lib/gasApi";
+
+import Result from "@/lib/Result";
 
 export default async function handler(
 	req: NextApiRequest,
 	res: NextApiResponse,
 ) {
-	const code = useSearchParams().get("code") ?? null;
-	if (!code) {
-		res.status(400);
-		return;
+	const { code } = req.query;
+	if (typeof code !== "string") {
+		return res.status(400).json({ error: "Invalid code" });
 	}
 
 	const fetchAccessTokenResult = await fetchAccessToken(code);
 	if (fetchAccessTokenResult.statusCode !== 200) {
-		res.status(fetchAccessTokenResult.statusCode);
-		return;
+		return res.status(fetchAccessTokenResult.statusCode).json({
+			error: "Failed to fetch access token",
+		});
 	}
 
-	const accessToken = fetchAccessTokenResult.payload?.accessToken;
+	const accessToken = fetchAccessTokenResult.payload?.accessToken as string;
 	const fetchAccountInfoResult = await fetchAccountInfo(accessToken);
 	if (fetchAccountInfoResult.statusCode !== 200) {
-		res.status(fetchAccountInfoResult.statusCode);
-		return;
+		return res.status(fetchAccountInfoResult.statusCode).json({
+			error: "Failed to fetch account info",
+		});
 	}
 
-	//TODO: fetch GAS API and save accountInfo into spreadsheet.
-	res.status(200).json({
+	const signInResult = await execGas("signInWithDiscord", [
+		JSON.stringify(fetchAccountInfoResult.payload),
+	]);
+	if (signInResult.statusCode !== 200) {
+		return res.status(signInResult.statusCode).json({
+			error: signInResult.message,
+		});
+	}
+
+	return res.status(200).json({
 		accessToken,
 	});
 }
 
-async function fetchAccessToken(code: string) {
+async function fetchAccessToken(
+	code: string,
+): Promise<Result<{ accessToken: string }>> {
 	const url = "https://discord.com/api/oauth2/token";
 
 	const clientId = process.env.DISCORD_CLIENT_ID;
@@ -41,6 +55,7 @@ async function fetchAccessToken(code: string) {
 		console.error("Error client id or client secret is not set properly");
 		return {
 			statusCode: 500,
+			payload: null,
 		};
 	}
 
@@ -67,6 +82,7 @@ async function fetchAccessToken(code: string) {
 	if (data.error) {
 		return {
 			statusCode: 401,
+			payload: null,
 		};
 	}
 
@@ -78,7 +94,9 @@ async function fetchAccessToken(code: string) {
 	};
 }
 
-async function fetchAccountInfo(accessToken: string) {
+async function fetchAccountInfo(
+	accessToken: string,
+): Promise<Result<{ id: string; name: string; avatarHash: string }>> {
 	const url = "https://discord.com/api/users/@me";
 	const options = {
 		headers: { authorization: `Bearer ${accessToken}` },
@@ -91,6 +109,7 @@ async function fetchAccountInfo(accessToken: string) {
 	if (!data.id) {
 		const result = {
 			statusCode: 401,
+			payload: null,
 		};
 		return result;
 	}
