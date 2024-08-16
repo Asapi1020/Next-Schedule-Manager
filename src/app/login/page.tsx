@@ -3,6 +3,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { useCookies } from "react-cookie";
 
+import { LoadingCircle } from "@/components/LoadingCircle";
 import { signInWithDiscord } from "@/lib/fetch";
 
 function ObtainLogin() {
@@ -26,7 +27,7 @@ function ObtainLogin() {
 					setCookie("access_token", accessToken, {
 						path: "/",
 					});
-					router.push("/");
+					router.push("/mypage");
 					return;
 				} else {
 					router.push("/");
@@ -42,7 +43,12 @@ function ObtainLogin() {
 		handleLogin();
 	}, [searchParams]);
 
-	return null;
+	return (
+		<div className="flex justify-center items-center container mx-auto p-4">
+			<LoadingCircle />
+			Authorizing...
+		</div>
+	);
 }
 
 export default function Home() {

@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 
 import { LoginButton } from "./LoginButton";
 import "@/styles/discord.css";
+import UserDropDown from "./UserDropdown";
 
 export const UserButton = () => {
 	const [isClient, setIsClient] = useState(false);
@@ -21,7 +21,7 @@ export const UserButton = () => {
 	}
 
 	if (accessToken) {
-		return <Link href={`/mypage`}>My Page</Link>;
+		return <UserDropDown></UserDropDown>;
 	}
 
 	return <LoginButton label="Login" />;

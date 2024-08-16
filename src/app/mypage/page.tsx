@@ -1,11 +1,15 @@
 "use client";
 
+import AddCircle from "@public/add-circle.svg";
 import CheckCircle from "@public/check-circle.svg";
+import Upload from "@public/cloud-upload.svg";
+import EditSquare from "@public/edit.svg";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useCookies } from "react-cookie";
 
+import { LoadingCircle } from "@/components/LoadingCircle";
 import { changeUserName, fetchUserInfo } from "@/lib/fetch";
 import { UserInfo } from "@/lib/schema";
 
@@ -46,7 +50,12 @@ const MyPage = () => {
 	}, []);
 
 	if (loading) {
-		return <div className="container mx-auto p-4">Loading...</div>;
+		return (
+			<div className="flex justify-center items-center container mx-auto p-4">
+				<LoadingCircle />
+				Loading...
+			</div>
+		);
 	}
 
 	if (!user) {
@@ -117,7 +126,21 @@ const MyPage = () => {
 										}`}
 										disabled={isSaving}
 									>
-										{isSaving ? "Saving..." : "Save"}
+										{isSaving ? (
+											<div className="flex justify-center items-center">
+												<LoadingCircle />
+												Saving...
+											</div>
+										) : (
+											<div className="flex items-center">
+												<Image
+													src={Upload}
+													alt="cloud upload"
+													className="w-6 h-6 mr-1"
+												/>
+												Save
+											</div>
+										)}
 									</button>
 								</div>
 							</div>
@@ -128,7 +151,14 @@ const MyPage = () => {
 									onClick={handleEditClick}
 									className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
 								>
-									Edit Profile
+									<div className="flex items-center">
+										<Image
+											src={EditSquare}
+											alt="edit pencil square"
+											className="w-6 h-6 mr-1"
+										/>
+										Edit Profile
+									</div>
 								</button>
 							</div>
 						)}
@@ -154,7 +184,14 @@ const MyPage = () => {
 				<div className="flex items-center justify-between mb-4">
 					<h3 className="text-xl font-semibold leading-tight">Your Groups</h3>
 					<button className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
-						Create New Group
+						<div className="flex items-center">
+							<Image
+								src={AddCircle}
+								alt="add circle"
+								className="w-6 h-6 mr-1"
+							/>
+							Create New Group
+						</div>
 					</button>
 				</div>
 				{user.groupsId.length > 0 ? (
