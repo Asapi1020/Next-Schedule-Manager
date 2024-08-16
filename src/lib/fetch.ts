@@ -31,3 +31,26 @@ export async function fetchUserInfo(accessToken: string) {
 
 	return response;
 }
+
+export async function changeUserName(
+	accessToken: string,
+	userId: string,
+	newName: string,
+) {
+	const url = apiUrl("/changeUserName");
+
+	// eslint-disable-next-line n/no-unsupported-features/node-builtins
+	const response = await fetch(url.toString(), {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: `Bearer ${accessToken}`,
+		},
+		body: JSON.stringify({
+			userId,
+			newName,
+		}),
+	});
+
+	return response;
+}

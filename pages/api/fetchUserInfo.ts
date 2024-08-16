@@ -9,7 +9,6 @@ async function handler(
 	accountId: string,
 ) {
 	const fetchUserInfoResult = await execGas("fetchUserInfo", [accountId]);
-	console.log(fetchUserInfoResult);
 	if (fetchUserInfoResult.statusCode !== 200) {
 		return res.status(fetchUserInfoResult.statusCode).json({
 			error: fetchUserInfoResult.message,

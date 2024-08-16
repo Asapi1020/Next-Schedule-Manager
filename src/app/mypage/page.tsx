@@ -1,10 +1,12 @@
 "use client";
 
+import CheckCircle from "@public/check-circle.svg";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useCookies } from "react-cookie";
 
-import { fetchUserInfo } from "@/lib/fetch";
+import { changeUserName, fetchUserInfo } from "@/lib/fetch";
 import { UserInfo } from "@/lib/schema";
 
 const MyPage = () => {
@@ -12,6 +14,8 @@ const MyPage = () => {
 	const [loading, setLoading] = useState<boolean>(true);
 	const [isEditing, setIsEditing] = useState<boolean>(false);
 	const [name, setName] = useState<string>("");
+	const [isSaving, setIsSaving] = useState<boolean>(false);
+	const [isSaved, setIsSaved] = useState<boolean>(false);
 
 	const [cookies] = useCookies<string>();
 	const accessToken = cookies.access_token;
@@ -52,20 +56,33 @@ const MyPage = () => {
 	}
 
 	const handleEditClick = () => {
+		setIsSaved(false);
 		setIsEditing(!isEditing);
+	};
+
+	const handleCancelClick = () => {
+		setIsEditing(false);
 	};
 
 	const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setName(event.target.value);
 	};
 
-	const handleSaveClick = () => {
-		//TODO: save on sheet
-		setIsEditing(false);
+	const handleSaveClick = async () => {
+		setIsSaving(true);
+		try {
+			await changeUserName(accessToken, user.id, name);
+			setIsEditing(false);
+			setIsSaved(true);
+		} catch (error) {
+			console.error("Failed to save the new name:", error);
+		} finally {
+			setIsSaving(false);
+		}
 	};
 
 	return (
-		<div className="container mx-auto p-4">
+		<div className="container mx-auto px-6 py-4">
 			{/* Profile Section */}
 			<div className="bg-gray-800 shadow-md rounded-lg p-6 mb-6">
 				<div className="flex items-center">
@@ -84,12 +101,25 @@ const MyPage = () => {
 									onChange={handleNameChange}
 									className="text-2xl font-semibold bg-gray-700 text-white p-1 rounded"
 								/>
-								<button
-									onClick={handleSaveClick}
-									className="bg-green-600 text-white py-1 px-3 rounded ml-4 hover:bg-green-700"
-								>
-									Save
-								</button>
+								<div className="flex items-center">
+									<button
+										onClick={handleCancelClick}
+										className="bg-red-600 text-white py-2 px-3 rounded mr-4 hover:bg-red-700"
+									>
+										Cancel
+									</button>
+									<button
+										onClick={handleSaveClick}
+										className={`text-white py-2 px-3 rounded ml-4 ${
+											isSaving
+												? "bg-gray-600"
+												: "bg-green-600 hover:bg-green-700"
+										}`}
+										disabled={isSaving}
+									>
+										{isSaving ? "Saving..." : "Save"}
+									</button>
+								</div>
 							</div>
 						) : (
 							<div className="flex items-center justify-between">
@@ -102,7 +132,19 @@ const MyPage = () => {
 								</button>
 							</div>
 						)}
-						<p className="text-gray-400 text-sm">ID: {user.id}</p>
+						<div className="flex items-center justify-between">
+							<p className="text-gray-400 text-sm">ID: {user.id}</p>
+							{isSaved && (
+								<div className="flex items-center mt-2">
+									<Image
+										src={CheckCircle}
+										alt="check circle"
+										className="w-6 h-6 mr-1"
+									/>
+									<p className="text-green-500 text-sm mr-4">Saved.</p>
+								</div>
+							)}
+						</div>
 					</div>
 				</div>
 			</div>
