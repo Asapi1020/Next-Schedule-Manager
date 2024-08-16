@@ -1,8 +1,9 @@
+function apiUrl(endPoint: string): URL {
+	return new URL("/api" + endPoint, process.env.NEXT_PUBLIC_FRONTEND_ADDRESS);
+}
+
 export async function signInWithDiscord(code: string) {
-	const url = new URL(
-		"/api/login/discord",
-		process.env.NEXT_PUBLIC_FRONTEND_ADDRESS,
-	);
+	const url = apiUrl("/login/discord");
 	url.searchParams.append("code", code);
 
 	// eslint-disable-next-line n/no-unsupported-features/node-builtins
@@ -10,6 +11,21 @@ export async function signInWithDiscord(code: string) {
 		method: "GET",
 		headers: {
 			"Content-Type": "application/json",
+		},
+	});
+
+	return response;
+}
+
+export async function fetchUserInfo(accessToken: string) {
+	const url = apiUrl("/fetchUserInfo");
+
+	// eslint-disable-next-line n/no-unsupported-features/node-builtins
+	const response = await fetch(url.toString(), {
+		method: "GET",
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: `Bearer ${accessToken}`,
 		},
 	});
 
