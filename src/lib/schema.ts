@@ -11,3 +11,8 @@ export interface AccountInfo {
 	name: string;
 	avatarHash: string;
 }
+
+export interface UserWithAccessToken {
+	accessToken: string;
+	user: UserInfo;
+}

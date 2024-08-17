@@ -54,3 +54,26 @@ export async function changeUserName(
 
 	return response;
 }
+
+export async function addNewGroup(
+	accessToken: string,
+	userId: string,
+	groupName: string,
+) {
+	const url = apiUrl("/addNewGroup");
+
+	// eslint-disable-next-line n/no-unsupported-features/node-builtins
+	const response = await fetch(url.toString(), {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: `Bearer ${accessToken}`,
+		},
+		body: JSON.stringify({
+			userId,
+			groupName,
+		}),
+	});
+
+	return response;
+}
