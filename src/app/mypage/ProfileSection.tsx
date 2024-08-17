@@ -94,7 +94,7 @@ const ProfileSection: React.FC<UserWithAccessToken> = ({
 				/>
 				<div className="flex-1">
 					{isEditing ? renderEditingView() : renderDefaultView()}
-					<div className="flex items-center justify-between mt-2">
+					<div className="flex items-center justify-between p-2">
 						<p className="text-gray-400 text-sm">ID: {user.id}</p>
 						{isSaved && (
 							<div className="flex items-center">

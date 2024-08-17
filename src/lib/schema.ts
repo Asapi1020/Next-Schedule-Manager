@@ -3,7 +3,7 @@ export interface UserInfo {
 	accountId: string;
 	name: string;
 	avatarHash: string;
-	groupsId: string[];
+	groups: GroupInfo[];
 }
 
 export interface AccountInfo {
@@ -15,4 +15,10 @@ export interface AccountInfo {
 export interface UserWithAccessToken {
 	accessToken: string;
 	user: UserInfo;
+}
+
+export interface GroupInfo {
+	id: string;
+	name: string;
+	adminId: string;
 }

@@ -2,11 +2,12 @@ import Logout from "@public/logout.svg";
 import UserCircle from "@public/user-circle.svg";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const UserDropDown = () => {
 	const [isOpen, setIsOpen] = useState(false);
 	const router = useRouter();
+	const dropdownRef = useRef<HTMLDivElement>(null);
 
 	const handleToggle = () => {
 		setIsOpen(!isOpen);
@@ -14,14 +15,32 @@ const UserDropDown = () => {
 
 	const handleMyPage = () => {
 		router.push("/mypage");
+		setIsOpen(false);
 	};
 
 	const handleLogout = () => {
 		router.push("/logout");
+		setIsOpen(false);
 	};
 
+	const handleClickOutside = (event: MouseEvent) => {
+		if (
+			dropdownRef.current &&
+			!dropdownRef.current.contains(event.target as Node)
+		) {
+			setIsOpen(false);
+		}
+	};
+
+	useEffect(() => {
+		document.addEventListener("mousedown", handleClickOutside);
+		return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
+		};
+	}, []);
+
 	return (
-		<div className="relative inline-block text-left">
+		<div className="relative inline-block text-left" ref={dropdownRef}>
 			<button
 				onClick={handleToggle}
 				className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-black text-sm font-medium text-white hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
