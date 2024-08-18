@@ -1,18 +1,24 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useCookies } from "react-cookie";
 
 import GroupSection from "./GroupSection";
 import ProfileSection from "./ProfileSection";
 
+import { UserContext } from "@/components/DataProvider";
 import { LoadingCircle } from "@/components/LoadingCircle";
 import { fetchUserInfo } from "@/lib/fetch";
 import { UserInfo } from "@/lib/schema";
 
 const MyPage = () => {
-	const [user, setUser] = useState<UserInfo | null>(null);
+	const userContext = useContext(UserContext);
+	if (!userContext) {
+		throw new Error("UserContext must be used within a UserProvider");
+	}
+	const { userInfo, setUserInfo } = userContext;
+
 	const [loading, setLoading] = useState<boolean>(true);
 
 	const [cookies] = useCookies<string>();
@@ -27,7 +33,7 @@ const MyPage = () => {
 
 				if (response.status === 200) {
 					const userInfo: UserInfo = await response.json();
-					setUser(userInfo);
+					setUserInfo(userInfo);
 					return;
 				} else {
 					const { error } = await response.json();
@@ -51,16 +57,20 @@ const MyPage = () => {
 		);
 	}
 
-	if (!user) {
+	if (!userInfo) {
 		return (
-			<div className="container mx-auto p-4">Failed to fetch user info</div>
+			<div className="container mx-auto p-4">Failed to fetch Info info</div>
 		);
 	}
 
 	return (
 		<div className="container mx-auto px-6 py-4">
-			<ProfileSection accessToken={accessToken} user={user} />
-			<GroupSection accessToken={accessToken} user={user} />
+			<ProfileSection
+				accessToken={accessToken}
+				userInfo={userInfo}
+				setUserInfo={setUserInfo}
+			/>
+			<GroupSection accessToken={accessToken} userInfo={userInfo} />
 		</div>
 	);
 };

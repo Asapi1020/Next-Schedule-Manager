@@ -2,14 +2,25 @@ import AddCircle from "@public/add-circle.svg";
 import ShieldCheck from "@public/shield-check.svg";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useContext, useState } from "react";
 
 import CancelButton from "@/components/CancelButton";
+import { GroupContext } from "@/components/DataProvider";
 import SaveButton from "@/components/SaveButton";
 import { addNewGroup } from "@/lib/fetch";
-import { GroupInfo, UserWithAccessToken } from "@/lib/schema";
+import { GroupInfo, UserInfo } from "@/lib/schema";
 
-const GroupSection: React.FC<UserWithAccessToken> = ({ accessToken, user }) => {
+interface GroupTemplate {
+	accessToken: string;
+	userInfo: UserInfo;
+}
+
+const GroupSection: React.FC<GroupTemplate> = ({ accessToken, userInfo }) => {
+	const context = useContext(GroupContext);
+	if (!context) {
+		throw new Error("GroupContext must be used within a GroupProvider");
+	}
+	const { setGroupInfo } = context;
 	const [isEditing, setIsEditing] = useState<boolean>(false);
 	const [name, setName] = useState<string>("");
 	const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -34,11 +45,12 @@ const GroupSection: React.FC<UserWithAccessToken> = ({ accessToken, user }) => {
 	const handleSaveClick = useCallback(async () => {
 		setIsSaving(true);
 		try {
-			const response = await addNewGroup(accessToken, user.id, name);
+			const response = await addNewGroup(accessToken, userInfo.id, name);
 
 			if (response.status === 200) {
-				const group: GroupInfo = await response.json();
-				router.push(`/group/${group.id}`);
+				const newGroupInfo: GroupInfo = await response.json();
+				setGroupInfo(newGroupInfo);
+				router.push(`/group/${newGroupInfo.id}`);
 			} else {
 				const { error } = await response.json();
 				throw new Error(error);
@@ -49,7 +61,7 @@ const GroupSection: React.FC<UserWithAccessToken> = ({ accessToken, user }) => {
 		} finally {
 			setIsSaving(false);
 		}
-	}, [accessToken, name, user.id]);
+	}, [accessToken, name, userInfo.id]);
 
 	const AdminCheckImage = () => {
 		const [isHovering, setIsHovering] = useState(false);
@@ -109,9 +121,9 @@ const GroupSection: React.FC<UserWithAccessToken> = ({ accessToken, user }) => {
 					/>
 				</div>
 			)}
-			{user.groups.length > 0 ? (
+			{userInfo.groups.length > 0 ? (
 				<div className="grid grid-cols-1 gap-4">
-					{user.groups.map((group, index) => (
+					{userInfo.groups.map((group, index) => (
 						<div
 							key={index}
 							className="bg-gray-700 rounded-lg p-4 shadow hover:shadow-lg transition-shadow duration-300"
@@ -123,7 +135,7 @@ const GroupSection: React.FC<UserWithAccessToken> = ({ accessToken, user }) => {
 								<h4 className="text-lg font-semibold text-white">
 									{group.name}
 								</h4>
-								{group.adminId === user.id && <AdminCheckImage />}
+								{group.adminId === userInfo.id && <AdminCheckImage />}
 							</a>
 							<p className="text-gray-400 mt-2 text-sm">ID: {group.id}</p>
 						</div>

@@ -3,19 +3,26 @@
 import CheckCircle from "@public/check-circle.svg";
 import EditSquare from "@public/edit.svg";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 
 import CancelButton from "@/components/CancelButton";
 import SaveButton from "@/components/SaveButton";
 import { changeUserName } from "@/lib/fetch";
-import { UserWithAccessToken } from "@/lib/schema";
+import { UserInfo } from "@/lib/schema";
 
-const ProfileSection: React.FC<UserWithAccessToken> = ({
+interface ProfileTemplate {
+	accessToken: string;
+	userInfo: UserInfo;
+	setUserInfo: Dispatch<SetStateAction<UserInfo | null>>;
+}
+
+const ProfileSection: React.FC<ProfileTemplate> = ({
 	accessToken,
-	user,
+	userInfo,
+	setUserInfo,
 }) => {
 	const [isEditing, setIsEditing] = useState<boolean>(false);
-	const [name, setName] = useState<string>(user.name);
+	const [name, setName] = useState<string>(userInfo.name);
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const [isSaved, setIsSaved] = useState<boolean>(false);
 
@@ -35,7 +42,8 @@ const ProfileSection: React.FC<UserWithAccessToken> = ({
 	const handleSaveClick = async () => {
 		setIsSaving(true);
 		try {
-			await changeUserName(accessToken, user.id, name);
+			await changeUserName(accessToken, userInfo.id, name);
+			setUserInfo(userInfo);
 			setIsEditing(false);
 			setIsSaved(true);
 		} catch (error) {
@@ -88,14 +96,14 @@ const ProfileSection: React.FC<UserWithAccessToken> = ({
 			<div className="flex items-center">
 				{/* Avatar */}
 				<img
-					src={`https://cdn.discordapp.com/avatars/${user.accountId}/${user.avatarHash}.png`}
+					src={`https://cdn.discordapp.com/avatars/${userInfo.accountId}/${userInfo.avatarHash}.png`}
 					alt="User Avatar"
 					className="w-12 h-12 rounded-full mr-4"
 				/>
 				<div className="flex-1">
 					{isEditing ? renderEditingView() : renderDefaultView()}
 					<div className="flex items-center justify-between p-2">
-						<p className="text-gray-400 text-sm">ID: {user.id}</p>
+						<p className="text-gray-400 text-sm">ID: {userInfo.id}</p>
 						{isSaved && (
 							<div className="flex items-center">
 								<Image
