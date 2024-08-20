@@ -1,28 +1,20 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useContext, useEffect, useState } from "react";
-import { useCookies } from "react-cookie";
+import { useEffect, useState } from "react";
 
 import Calendar from "./calendar";
 
-import { UserContext } from "@/components/DataProvider";
 import { LoadingCircle } from "@/components/LoadingCircle";
 import { fetchUserInfo } from "@/lib/fetch";
+import { getAccessToken, useUserContext } from "@/lib/getAccessToken";
 import { UserInfo } from "@/lib/schema";
+import dayjs from "dayjs";
 
 const groupPage = () => {
-	const userContext = useContext(UserContext);
-	if (!userContext) {
-		throw new Error("UserContext must be used within a UserProvider");
-	}
-	const { userInfo, setUserInfo } = userContext;
-	console.log(userInfo);
-
+	const [userInfo, setUserInfo] = useUserContext();
 	const [loading, setLoading] = useState<boolean>(false);
-
-	const [cookies] = useCookies<string>();
-	const accessToken = cookies.access_token;
+	const accessToken = getAccessToken();
 
 	const router = useRouter();
 
@@ -68,13 +60,19 @@ const groupPage = () => {
 
 	const params = useParams();
 	const groupId = params?.groupId;
+	const today = dayjs();
 
 	// TODO: fetch group info
 
 	return (
 		<div className="container mx-auto px-6 py-4">
 			<h1>GroupName</h1>
-			<Calendar userInfo={userInfo}></Calendar>
+			<div className="calendar-container">
+				<h2 className="text-xl font-bold mb-4 text-center">
+					{today.format("MMMM YYYY")}
+				</h2>
+				<Calendar userInfo={userInfo} today={today} />
+			</div>
 		</div>
 	);
 };
