@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, ReactNode, useState } from "react";
+import React, { createContext, ReactNode, useEffect, useState } from "react";
 
 import { GroupInfo, UserInfo } from "@/lib/schema";
 
@@ -18,7 +18,21 @@ export const UserContext = createContext<UserContextType | null>(null);
 export const GroupContext = createContext<GroupContextType | null>(null);
 
 function UserProvider({ children }: { children: ReactNode }) {
-	const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+	const [userInfo, setUserInfo] = useState<UserInfo | null>(() => {
+		if (typeof window !== "undefined") {
+			const savedUserInfo = localStorage.getItem("userInfo");
+			return savedUserInfo ? JSON.parse(savedUserInfo) : null;
+		}
+		return null;
+	});
+
+	useEffect(() => {
+		if (userInfo) {
+			localStorage.setItem("userInfo", JSON.stringify(userInfo));
+		} else {
+			localStorage.removeItem("userInfo");
+		}
+	}, [userInfo]);
 
 	return (
 		<UserContext.Provider value={{ userInfo, setUserInfo }}>
@@ -28,7 +42,21 @@ function UserProvider({ children }: { children: ReactNode }) {
 }
 
 function GroupProvider({ children }: { children: ReactNode }) {
-	const [groupInfo, setGroupInfo] = useState<GroupInfo | null>(null);
+	const [groupInfo, setGroupInfo] = useState<GroupInfo | null>(() => {
+		if (typeof window !== "undefined") {
+			const savedGroupInfo = localStorage.getItem("groupInfo");
+			return savedGroupInfo ? JSON.parse(savedGroupInfo) : null;
+		}
+		return null;
+	});
+
+	useEffect(() => {
+		if (groupInfo) {
+			localStorage.setItem("groupInfo", JSON.stringify(groupInfo));
+		} else {
+			localStorage.removeItem("groupInfo");
+		}
+	}, [groupInfo]);
 
 	return (
 		<GroupContext.Provider value={{ groupInfo, setGroupInfo }}>
@@ -38,6 +66,16 @@ function GroupProvider({ children }: { children: ReactNode }) {
 }
 
 export default function DataProvider({ children }: { children: ReactNode }) {
+	const [isClient, setIsClient] = useState(false);
+
+	useEffect(() => {
+		setIsClient(true);
+	}, []);
+
+	if (!isClient) {
+		return null;
+	}
+
 	return (
 		<UserProvider>
 			<GroupProvider>{children}</GroupProvider>

@@ -1,20 +1,28 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useContext, useEffect, useState } from "react";
+import { useCookies } from "react-cookie";
 
-import GroupSection from "./GroupSection";
-import ProfileSection from "./ProfileSection";
+import Calendar from "./calendar";
 
+import { UserContext } from "@/components/DataProvider";
 import { LoadingCircle } from "@/components/LoadingCircle";
 import { fetchUserInfo } from "@/lib/fetch";
-import { getAccessToken, useUserContext } from "@/lib/getAccessToken";
 import { UserInfo } from "@/lib/schema";
 
-const MyPage = () => {
-	const [userInfo, setUserInfo] = useUserContext();
+const groupPage = () => {
+	const userContext = useContext(UserContext);
+	if (!userContext) {
+		throw new Error("UserContext must be used within a UserProvider");
+	}
+	const { userInfo, setUserInfo } = userContext;
+	console.log(userInfo);
+
 	const [loading, setLoading] = useState<boolean>(false);
-	const accessToken = getAccessToken();
+
+	const [cookies] = useCookies<string>();
+	const accessToken = cookies.access_token;
 
 	const router = useRouter();
 
@@ -25,15 +33,13 @@ const MyPage = () => {
 				const response = await fetchUserInfo(accessToken);
 
 				if (response.status === 200) {
-					const newUserInfo: UserInfo = await response.json();
-					setUserInfo(newUserInfo);
+					const userInfo: UserInfo = await response.json();
+					setUserInfo(userInfo);
 					return;
 				} else {
 					const { error } = await response.json();
-					setUserInfo(null);
 					router.push("/");
-					console.error(error);
-					return;
+					throw new Error(error);
 				}
 			} finally {
 				setLoading(false);
@@ -43,7 +49,7 @@ const MyPage = () => {
 		if (!userInfo) {
 			fetchUserData();
 		}
-	}, [accessToken]);
+	}, []);
 
 	if (loading) {
 		return (
@@ -60,16 +66,17 @@ const MyPage = () => {
 		);
 	}
 
+	const params = useParams();
+	const groupId = params?.groupId;
+
+	// TODO: fetch group info
+
 	return (
 		<div className="container mx-auto px-6 py-4">
-			<ProfileSection
-				accessToken={accessToken}
-				userInfo={userInfo}
-				setUserInfo={setUserInfo}
-			/>
-			<GroupSection accessToken={accessToken} userInfo={userInfo} />
+			<h1>GroupName</h1>
+			<Calendar userInfo={userInfo}></Calendar>
 		</div>
 	);
 };
 
-export default MyPage;
+export default groupPage;

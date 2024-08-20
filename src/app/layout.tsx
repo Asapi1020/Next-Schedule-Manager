@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { Suspense } from "react";
 
 import "@/styles/globals.css";
 import DataProvider from "@/components/DataProvider";
@@ -27,7 +26,7 @@ export default function RootLayout({
 			<body className={inter.className}>
 				<DataProvider>
 					<Header></Header>
-					<Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+					{children}
 				</DataProvider>
 			</body>
 		</html>
