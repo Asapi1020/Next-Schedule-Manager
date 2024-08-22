@@ -1,15 +1,15 @@
 "use client";
 
+import dayjs from "dayjs";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import Calendar from "./calendar";
 
 import { LoadingCircle } from "@/components/LoadingCircle";
+import { getAccessToken, useUserContext } from "@/lib/dataUtils";
 import { fetchUserInfo } from "@/lib/fetch";
-import { getAccessToken, useUserContext } from "@/lib/getAccessToken";
 import { UserInfo } from "@/lib/schema";
-import dayjs from "dayjs";
 
 const groupPage = () => {
 	const [userInfo, setUserInfo] = useUserContext();
@@ -37,6 +37,11 @@ const groupPage = () => {
 				setLoading(false);
 			}
 		};
+
+		if (!accessToken) {
+			router.push("/");
+			return;
+		}
 
 		if (!userInfo) {
 			fetchUserData();

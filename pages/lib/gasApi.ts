@@ -51,10 +51,15 @@ interface GasResponse {
 	};
 }
 
+// FIXME: change DB system
 export default async function execGas(
 	functionName: string,
 	parameters?: string[],
 ): Promise<{ statusCode: number; message: string }> {
+	return {
+		statusCode: 200,
+		message: "",
+	};
 	const accessToken = await getAccessToken();
 
 	const requestData = JSON.stringify({
