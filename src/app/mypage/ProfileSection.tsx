@@ -7,13 +7,13 @@ import React, { Dispatch, SetStateAction, useState } from "react";
 
 import CancelButton from "@/components/CancelButton";
 import SaveButton from "@/components/SaveButton";
-import { changeUserName } from "@/lib/fetch";
-import { UserInfo } from "@/lib/schema";
+import { changeUserName } from "@/lib/apiClient";
+import { UserProfile } from "@/lib/schema";
 
 interface ProfileTemplate {
 	accessToken: string;
-	userInfo: UserInfo;
-	setUserInfo: Dispatch<SetStateAction<UserInfo | null>>;
+	userInfo: UserProfile;
+	setUserInfo: Dispatch<SetStateAction<UserProfile | null>>;
 }
 
 const ProfileSection: React.FC<ProfileTemplate> = ({

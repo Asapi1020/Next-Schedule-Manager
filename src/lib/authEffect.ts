@@ -1,7 +1,7 @@
 import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction, useEffect } from "react";
 
-import { fetchUserInfo } from "./fetch";
+import { fetchUserInfo } from "./apiClient";
 import { UserProfile } from "./schema";
 
 const authEffect = (

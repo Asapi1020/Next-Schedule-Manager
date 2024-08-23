@@ -7,12 +7,12 @@ import { useCallback, useContext, useState } from "react";
 import CancelButton from "@/components/CancelButton";
 import { GroupContext } from "@/components/DataProvider";
 import SaveButton from "@/components/SaveButton";
-import { addNewGroup } from "@/lib/fetch";
-import { GroupInfo, UserInfo } from "@/lib/schema";
+import { addNewGroup } from "@/lib/apiClient";
+import { GroupInfo, UserProfile } from "@/lib/schema";
 
 interface GroupTemplate {
 	accessToken: string;
-	userInfo: UserInfo;
+	userInfo: UserProfile;
 }
 
 const GroupSection: React.FC<GroupTemplate> = ({ accessToken, userInfo }) => {

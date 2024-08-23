@@ -25,9 +25,7 @@ export default class DbModel {
 	 * @param fetchedAccountInfo from external API
 	 * @returns
 	 */
-	public async signIn(
-		fetchedAccountInfo: BaseAccountInfo,
-	): Promise<Result<null>> {
+	public async signIn(fetchedAccountInfo: BaseAccountInfo): Promise<Result> {
 		try {
 			const existingAccountAny = await this.collection.account.findOne({
 				id: fetchedAccountInfo.id,
@@ -129,6 +127,22 @@ export default class DbModel {
 					avatarHash: account.avatarHash,
 					groups: baseGroupsInfo,
 				},
+			};
+		} catch (error) {
+			return {
+				statusCode: 500,
+				data: null,
+				error: `${error}`,
+			};
+		}
+	}
+
+	public async changeUserName(id: string, name: string): Promise<Result> {
+		try {
+			await this.collection.user.updateOne({ id }, { $set: { name } });
+			return {
+				statusCode: 200,
+				data: null,
 			};
 		} catch (error) {
 			return {

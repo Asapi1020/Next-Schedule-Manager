@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useCookies } from "react-cookie";
 
 import { LoadingCircle } from "@/components/LoadingCircle";
-import { signInWithDiscord } from "@/lib/fetch";
+import { signInWithDiscord } from "@/lib/apiClient";
 
 function ObtainLogin() {
 	const [, setCookie] = useCookies(["access_token"]);
