@@ -15,8 +15,10 @@
 		"lint:prettier": "prettier --check ."
 	},
 	"dependencies": {
+		"@paralleldrive/cuid2": "^2.2.2",
 		"dayjs": "^1.11.12",
 		"express": "^4.19.2",
+		"mongodb": "^6.8.0",
 		"next": "14.2.5",
 		"node-fetch": "^3.3.2",
 		"react": "^18",

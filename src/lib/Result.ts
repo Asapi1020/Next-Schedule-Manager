@@ -1,4 +1,5 @@
 export default interface Result<T> {
 	statusCode: number;
-	payload: T | null;
+	data: T | null;
+	error?: string;
 }

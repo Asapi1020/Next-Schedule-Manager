@@ -1,5 +1,5 @@
 import Result from "@/lib/Result";
-import { AccountInfo } from "@/lib/schema";
+import { BaseAccountInfo } from "@/lib/schema";
 
 export async function fetchAccessToken(
 	code: string,
@@ -11,14 +11,14 @@ export async function fetchAccessToken(
 	const frontendAddress = process.env.NEXT_PUBLIC_FRONTEND_ADDRESS;
 
 	if (!clientId || !clientSecret || !frontendAddress) {
-		console.error("Error client id or client secret is not set properly");
 		return {
 			statusCode: 500,
-			payload: null,
+			data: null,
+			error: "Error client id or client secret is not set properly",
 		};
 	}
 
-	const payload = new URLSearchParams({
+	const data = new URLSearchParams({
 		client_id: clientId,
 		client_secret: clientSecret,
 		code,
@@ -31,31 +31,32 @@ export async function fetchAccessToken(
 		headers: {
 			"Content-Type": "application/x-www-form-urlencoded",
 		},
-		body: payload,
+		body: data,
 	};
 
 	// eslint-disable-next-line n/no-unsupported-features/node-builtins
 	const response = await fetch(url, options);
-	const data = await response.json();
+	const result = await response.json();
 
-	if (data.error) {
+	if (result.error) {
 		return {
 			statusCode: 401,
-			payload: null,
+			data: null,
+			error: `${result.error}`,
 		};
 	}
 
 	return {
 		statusCode: 200,
-		payload: {
-			accessToken: data.access_token,
+		data: {
+			accessToken: result.access_token,
 		},
 	};
 }
 
 export async function fetchAccountInfo(
 	accessToken: string,
-): Promise<Result<AccountInfo>> {
+): Promise<Result<BaseAccountInfo>> {
 	const url = "https://discord.com/api/users/@me";
 	const options = {
 		headers: { authorization: `Bearer ${accessToken}` },
@@ -63,22 +64,22 @@ export async function fetchAccountInfo(
 
 	// eslint-disable-next-line n/no-unsupported-features/node-builtins
 	const response = await fetch(url, options);
-	const data = await response.json();
+	const result = await response.json();
 
-	if (!data.id) {
-		const result = {
+	if (!result.id) {
+		return {
 			statusCode: 401,
-			payload: null,
+			data: null,
+			error: "Unauthorized",
 		};
-		return result;
 	}
 
 	return {
 		statusCode: 200,
-		payload: {
-			id: data.id,
-			name: data.global_name || data.username || "Unnamed User",
-			avatarHash: data.avatar,
+		data: {
+			id: result.id,
+			name: result.global_name || result.username || "Unnamed User",
+			avatarHash: result.avatar,
 		},
 	};
 }

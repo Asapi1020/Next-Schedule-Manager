@@ -1,7 +1,10 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
+import DbModel from "../../lib/db/DbModel";
+import clientPromise from "../../lib/db/mongo";
 import { fetchAccessToken, fetchAccountInfo } from "../../lib/discord/oauth";
-import execGas from "../../lib/gasApi";
+
+import { BaseAccountInfo } from "@/lib/schema";
 
 export default async function handler(
 	req: NextApiRequest,
@@ -14,25 +17,27 @@ export default async function handler(
 
 	const fetchAccessTokenResult = await fetchAccessToken(code);
 	if (fetchAccessTokenResult.statusCode !== 200) {
-		return res.status(fetchAccessTokenResult.statusCode).json({
-			error: "Failed to fetch access token",
-		});
+		return res
+			.status(fetchAccessTokenResult.statusCode)
+			.json({ error: fetchAccessTokenResult.error });
 	}
 
-	const accessToken = fetchAccessTokenResult.payload?.accessToken as string;
+	const accessToken = fetchAccessTokenResult.data?.accessToken as string;
 	const fetchAccountInfoResult = await fetchAccountInfo(accessToken);
 	if (fetchAccountInfoResult.statusCode !== 200) {
 		return res.status(fetchAccountInfoResult.statusCode).json({
-			error: "Failed to fetch account info",
+			error: fetchAccountInfoResult.error,
 		});
 	}
 
-	const signInResult = await execGas("signInWithDiscord", [
-		JSON.stringify(fetchAccountInfoResult.payload),
-	]);
+	const client = await clientPromise;
+	const dbModel = new DbModel(client);
+	const signInResult = await dbModel.signIn(
+		fetchAccountInfoResult.data as BaseAccountInfo,
+	);
 	if (signInResult.statusCode !== 200) {
 		return res.status(signInResult.statusCode).json({
-			error: signInResult.message,
+			error: signInResult.error,
 		});
 	}
 
