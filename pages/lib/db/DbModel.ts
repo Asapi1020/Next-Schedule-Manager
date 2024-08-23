@@ -1,10 +1,10 @@
 import { createId as cuid } from "@paralleldrive/cuid2";
 import { Db, MongoClient } from "mongodb";
 
-import { mapToAccount } from "./mapper";
+import { mapToAccount, mapToBaseGroupsInfo } from "./mapper";
 
 import Result from "@/lib/Result";
-import { Account, BaseAccountInfo, User } from "@/lib/schema";
+import { Account, BaseAccountInfo, User, UserProfile } from "@/lib/schema";
 
 export default class DbModel {
 	private db: Db;
@@ -29,11 +29,11 @@ export default class DbModel {
 		fetchedAccountInfo: BaseAccountInfo,
 	): Promise<Result<null>> {
 		try {
-			const existingAccountWithId = await this.collection.account.findOne({
+			const existingAccountAny = await this.collection.account.findOne({
 				id: fetchedAccountInfo.id,
 			});
-			if (existingAccountWithId) {
-				const existingAccount = mapToAccount(existingAccountWithId);
+			if (existingAccountAny) {
+				const existingAccount = mapToAccount(existingAccountAny);
 				if (this.needUpdateAccount(fetchedAccountInfo, existingAccount)) {
 					await this.updateAccount(fetchedAccountInfo, existingAccount);
 				}
@@ -93,50 +93,49 @@ export default class DbModel {
 		);
 	}
 
-	// public async fetchUserInfo(accountId: string): Promise<Result<UserInfo>> {
-	// 	try {
-	// 		const account = await this.collection.account.findOne({ id: accountId });
-	// 		if (!account) {
-	// 			return {
-	// 				statusCode: 404,
-	// 				payload: { error: "Not Found" },
-	// 			};
-	// 		}
+	public async fetchUserInfo(accountId: string): Promise<Result<UserProfile>> {
+		try {
+			const account = await this.collection.account.findOne({ id: accountId });
+			if (!account) {
+				return {
+					statusCode: 404,
+					data: null,
+					error: "Not Found",
+				};
+			}
 
-	// 		const user = await this.collection.user.findOne({ id: account.userId });
-	// 		if (!user) {
-	// 			return {
-	// 				statusCode: 500,
-	// 				payload: { error: "Internal Server Error" },
-	// 			};
-	// 		}
+			const user = await this.collection.user.findOne({ id: account.userId });
+			if (!user) {
+				return {
+					statusCode: 500,
+					data: null,
+					error: "Internal Server Error",
+				};
+			}
 
-	// 		const groups = user.groupsId.map((groupId: string) => {
-	// 			const group = await this.collection.group.findOne({ id: groupId });
-	// 			return {
-	// 				id: groupId,
-	// 				name: group?.name,
-	// 				adminId: group?.adminId,
-	// 			};
-	// 		});
+			const groups = await this.collection.group
+				.find({
+					id: { $in: user.groupsId },
+				})
+				.toArray();
+			const baseGroupsInfo = mapToBaseGroupsInfo(groups);
 
-	// 		return {
-	// 			statusCode: 200,
-	// 			payload: {
-	// 				id: user.id,
-	// 				accountId,
-	// 				name: user.name,
-	// 				avatarHash: account.avatarHash,
-	// 				groups,
-	// 			},
-	// 		};
-	// 	} catch (error) {
-	// 		return {
-	// 			statusCode: 500,
-	// 			payload: {
-	// 				error: `${error}`,
-	// 			},
-	// 		};
-	// 	}
-	// }
+			return {
+				statusCode: 200,
+				data: {
+					id: user.id,
+					accountId,
+					name: user.name,
+					avatarHash: account.avatarHash,
+					groups: baseGroupsInfo,
+				},
+			};
+		} catch (error) {
+			return {
+				statusCode: 500,
+				data: null,
+				error: `${error}`,
+			};
+		}
+	}
 }

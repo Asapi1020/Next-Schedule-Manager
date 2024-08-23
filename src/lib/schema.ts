@@ -1,3 +1,15 @@
+export interface BaseAccountInfo {
+	id: string;
+	name: string;
+	avatarHash: string;
+}
+
+export interface BaseGroupInfo {
+	id: string;
+	name: string;
+	adminId: string;
+}
+
 export interface User {
 	id: string;
 	name: string;
@@ -8,10 +20,7 @@ export interface Account extends BaseAccountInfo {
 	userId: string;
 }
 
-export interface Group {
-	id: string;
-	name: string;
-	adminId: string;
+export interface Group extends BaseGroupInfo {
 	usersId: string[];
 }
 
@@ -22,27 +31,15 @@ export interface Schedule {
 	//status
 }
 
-// export interface UserInfo {
-// 	id: string;
-// 	accountId: string;
-// 	name: string;
-// 	avatarHash: string;
-// 	groups: GroupInfo[];
-// }
-
-export interface BaseAccountInfo {
+export interface UserProfile {
 	id: string;
+	accountId: string;
 	name: string;
 	avatarHash: string;
+	groups: BaseGroupInfo[];
 }
 
 // export interface UserWithAccessToken {
 // 	accessToken: string;
 // 	user: UserInfo;
-// }
-
-// export interface GroupInfo {
-// 	id: string;
-// 	name: string;
-// 	adminId: string;
 // }

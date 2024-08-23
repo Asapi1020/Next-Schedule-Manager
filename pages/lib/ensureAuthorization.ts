@@ -27,7 +27,7 @@ export default function ensureAuthorization(
 			});
 		}
 
-		const accountId = fetchAccountInfoResult.payload?.id as string;
+		const accountId = fetchAccountInfoResult.data?.id as string;
 		return handler(req, res, accountId);
 	};
 }

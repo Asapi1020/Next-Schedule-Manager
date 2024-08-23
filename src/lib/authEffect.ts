@@ -2,13 +2,13 @@ import { useRouter } from "next/navigation";
 import { Dispatch, SetStateAction, useEffect } from "react";
 
 import { fetchUserInfo } from "./fetch";
-import { UserInfo } from "./schema";
+import { UserProfile } from "./schema";
 
 const authEffect = (
 	accessToken: string,
 	setLoading: Dispatch<SetStateAction<boolean>>,
-	userInfo: UserInfo | null,
-	setUserInfo: Dispatch<SetStateAction<UserInfo | null>>,
+	userInfo: UserProfile | null,
+	setUserInfo: Dispatch<SetStateAction<UserProfile | null>>,
 ) => {
 	const router = useRouter();
 
@@ -20,7 +20,7 @@ const authEffect = (
 				const response = await fetchUserInfo(accessToken);
 
 				if (response.status === 200) {
-					const newUserInfo: UserInfo = await response.json();
+					const newUserInfo: UserProfile = await response.json();
 					setUserInfo(newUserInfo);
 					return;
 				} else {
