@@ -1,7 +1,7 @@
 import { createId as cuid } from "@paralleldrive/cuid2";
-import { Db, MongoClient } from "mongodb";
+import { Db, MongoClient, PushOperator } from "mongodb";
 
-import { mapToAccount, mapToBaseGroupsInfo } from "./mapper";
+import { ensureGroup, mapToAccount, mapToBaseGroupsInfo } from "./mapper";
 
 import Result from "@/lib/Result";
 import {
@@ -164,16 +164,23 @@ export default class DbModel {
 		name: string,
 	): Promise<Result<Group>> {
 		try {
-			const group: Group = {
+			const group = {
 				id: cuid(),
 				name,
 				adminId,
-				usersId: [],
+				usersId: [adminId],
 			};
 			await this.collection.group.insertOne(group);
+
+			const pushOperator: PushOperator<Document> = { groupsId: group.id };
+			await this.collection.user.updateOne(
+				{ id: adminId },
+				{ $push: pushOperator },
+			);
+
 			return {
 				statusCode: 200,
-				data: group,
+				data: ensureGroup(group),
 			};
 		} catch (error) {
 			return {

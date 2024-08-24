@@ -1,52 +1,21 @@
 "use client";
 
 import dayjs from "dayjs";
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { useState } from "react";
 
 import Calendar from "./calendar";
 
 import { LoadingCircle } from "@/components/LoadingCircle";
+import authEffect from "@/lib/authEffect";
 import { getAccessToken, useUserContext } from "@/lib/dataUtils";
-import { fetchUserInfo } from "@/lib/fetch";
-import { UserInfo } from "@/lib/schema";
 
 const groupPage = () => {
 	const [userInfo, setUserInfo] = useUserContext();
 	const [loading, setLoading] = useState<boolean>(false);
 	const accessToken = getAccessToken();
 
-	const router = useRouter();
-
-	useEffect(() => {
-		const fetchUserData = async () => {
-			setLoading(true);
-			try {
-				const response = await fetchUserInfo(accessToken);
-
-				if (response.status === 200) {
-					const userInfo: UserInfo = await response.json();
-					setUserInfo(userInfo);
-					return;
-				} else {
-					const { error } = await response.json();
-					router.push("/");
-					throw new Error(error);
-				}
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		if (!accessToken) {
-			router.push("/");
-			return;
-		}
-
-		if (!userInfo) {
-			fetchUserData();
-		}
-	}, []);
+	authEffect(accessToken, setLoading, userInfo, setUserInfo);
 
 	if (loading) {
 		return (

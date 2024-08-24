@@ -38,7 +38,11 @@ const MyPage = () => {
 				userInfo={userInfo}
 				setUserInfo={setUserInfo}
 			/>
-			<GroupSection accessToken={accessToken} userInfo={userInfo} />
+			<GroupSection
+				accessToken={accessToken}
+				userInfo={userInfo}
+				setUserInfo={setUserInfo}
+			/>
 		</div>
 	);
 };

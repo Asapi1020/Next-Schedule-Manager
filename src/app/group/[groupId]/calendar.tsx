@@ -5,10 +5,10 @@ import { useState } from "react";
 
 import PlayButton from "@/components/PlayButton";
 import SaveButton from "@/components/SaveButton";
-import { UserInfo } from "@/lib/schema";
+import { UserProfile } from "@/lib/schema";
 
 interface CalendarTemplate {
-	userInfo: UserInfo;
+	userInfo: UserProfile;
 	today: dayjs.Dayjs;
 }
 
@@ -23,7 +23,6 @@ const Calendar: React.FC<CalendarTemplate> = ({ userInfo, today }) => {
 	const daysInMonth = endOfMonth.date();
 	const startDayOfWeek = startOfMonth.day();
 
-	const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 	const fullNameDaysOfWeek = [
 		"Sunday",
 		"Monday",
@@ -33,6 +32,9 @@ const Calendar: React.FC<CalendarTemplate> = ({ userInfo, today }) => {
 		"Friday",
 		"Saturday",
 	];
+	const daysOfWeek = fullNameDaysOfWeek.map((day) => {
+		return day.slice(0, 3);
+	});
 	const availabilities = ["〇", "△", "×"];
 
 	const initialSelections = Array.from({ length: daysInMonth }, () => "-");

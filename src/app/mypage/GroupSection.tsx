@@ -2,7 +2,7 @@ import AddCircle from "@public/add-circle.svg";
 import ShieldCheck from "@public/shield-check.svg";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useState } from "react";
 
 import CancelButton from "@/components/CancelButton";
 import SaveButton from "@/components/SaveButton";
@@ -13,9 +13,14 @@ import { Group, UserProfile } from "@/lib/schema";
 interface GroupTemplate {
 	accessToken: string;
 	userInfo: UserProfile;
+	setUserInfo: Dispatch<SetStateAction<UserProfile | null>>;
 }
 
-const GroupSection: React.FC<GroupTemplate> = ({ accessToken, userInfo }) => {
+const GroupSection: React.FC<GroupTemplate> = ({
+	accessToken,
+	userInfo,
+	setUserInfo,
+}) => {
 	const [, setGroupInfo] = useGroupContext();
 	const [isEditing, setIsEditing] = useState<boolean>(false);
 	const [name, setName] = useState<string>("");
@@ -46,6 +51,15 @@ const GroupSection: React.FC<GroupTemplate> = ({ accessToken, userInfo }) => {
 			if (response.status === 200) {
 				const newGroupInfo: Group = await response.json();
 				setGroupInfo(newGroupInfo);
+
+				const usersGroups = userInfo.groups;
+				usersGroups.push({
+					id: newGroupInfo.id,
+					name,
+					adminId: userInfo.id,
+				});
+				setUserInfo({ ...userInfo, groups: usersGroups });
+
 				router.push(`/group/${newGroupInfo.id}`);
 			} else {
 				const { error } = await response.json();
