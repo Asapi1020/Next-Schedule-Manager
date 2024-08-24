@@ -11,7 +11,7 @@ import { getAccessToken, useUserContext } from "@/lib/dataUtils";
 
 const MyPage = () => {
 	const [userInfo, setUserInfo] = useUserContext();
-	const [loading, setLoading] = useState<boolean>(true);
+	const [loading, setLoading] = useState<boolean>(false);
 	const accessToken = getAccessToken();
 
 	authEffect(accessToken, setLoading, userInfo, setUserInfo);
@@ -33,11 +33,7 @@ const MyPage = () => {
 
 	return (
 		<div className="container mx-auto px-6 py-4">
-			<ProfileSection
-				accessToken={accessToken}
-				userInfo={userInfo}
-				setUserInfo={setUserInfo}
-			/>
+			<ProfileSection accessToken={accessToken} />
 			<GroupSection accessToken={accessToken} userInfo={userInfo} />
 		</div>
 	);

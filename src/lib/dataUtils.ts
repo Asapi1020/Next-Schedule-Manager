@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, useContext } from "react";
 import { useCookies } from "react-cookie";
 
-import { UserInfo } from "./schema";
+import { UserProfile } from "./schema";
 
 import { UserContext } from "@/components/DataProvider";
 
@@ -12,8 +12,8 @@ export function getAccessToken(): string {
 }
 
 export function useUserContext(): [
-	UserInfo | null,
-	Dispatch<SetStateAction<UserInfo | null>>,
+	UserProfile | null,
+	Dispatch<SetStateAction<UserProfile | null>>,
 ] {
 	const userContext = useContext(UserContext);
 	if (!userContext) {

@@ -3,24 +3,22 @@
 import CheckCircle from "@public/check-circle.svg";
 import EditSquare from "@public/edit.svg";
 import Image from "next/image";
-import React, { Dispatch, SetStateAction, useState } from "react";
+import React, { useState } from "react";
 
 import CancelButton from "@/components/CancelButton";
 import SaveButton from "@/components/SaveButton";
 import { changeUserName } from "@/lib/apiClient";
-import { UserProfile } from "@/lib/schema";
+import { useUserContext } from "@/lib/dataUtils";
 
 interface ProfileTemplate {
 	accessToken: string;
-	userInfo: UserProfile;
-	setUserInfo: Dispatch<SetStateAction<UserProfile | null>>;
 }
 
-const ProfileSection: React.FC<ProfileTemplate> = ({
-	accessToken,
-	userInfo,
-	setUserInfo,
-}) => {
+const ProfileSection: React.FC<ProfileTemplate> = ({ accessToken }) => {
+	const [userInfo, setUserInfo] = useUserContext();
+	if (!userInfo) {
+		return null;
+	}
 	const [isEditing, setIsEditing] = useState<boolean>(false);
 	const [name, setName] = useState<string>(userInfo.name);
 	const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -32,6 +30,7 @@ const ProfileSection: React.FC<ProfileTemplate> = ({
 	};
 
 	const handleCancelClick = () => {
+		setName(userInfo.name);
 		setIsEditing(false);
 	};
 
@@ -43,7 +42,7 @@ const ProfileSection: React.FC<ProfileTemplate> = ({
 		setIsSaving(true);
 		try {
 			await changeUserName(accessToken, userInfo.id, name);
-			setUserInfo(userInfo);
+			setUserInfo({ ...userInfo, name });
 			setIsEditing(false);
 			setIsSaved(true);
 		} catch (error) {
