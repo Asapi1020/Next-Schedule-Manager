@@ -33,7 +33,11 @@ const MyPage = () => {
 
 	return (
 		<div className="container mx-auto px-6 py-4">
-			<ProfileSection accessToken={accessToken} />
+			<ProfileSection
+				accessToken={accessToken}
+				userInfo={userInfo}
+				setUserInfo={setUserInfo}
+			/>
 			<GroupSection accessToken={accessToken} userInfo={userInfo} />
 		</div>
 	);

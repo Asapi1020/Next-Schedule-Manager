@@ -1,9 +1,9 @@
 import { Dispatch, SetStateAction, useContext } from "react";
 import { useCookies } from "react-cookie";
 
-import { UserProfile } from "./schema";
+import { Group, UserProfile } from "./schema";
 
-import { UserContext } from "@/components/DataProvider";
+import { GroupContext, UserContext } from "@/components/DataProvider";
 
 export function getAccessToken(): string {
 	const [cookies] = useCookies<string>();
@@ -23,4 +23,18 @@ export function useUserContext(): [
 	}
 	const { userInfo, setUserInfo } = userContext;
 	return [userInfo, setUserInfo];
+}
+
+export function useGroupContext(): [
+	Group | null,
+	Dispatch<SetStateAction<Group | null>>,
+] {
+	const groupContext = useContext(GroupContext);
+	if (!groupContext) {
+		console.error("GroupContext must be used within a GroupProvider");
+		// eslint-disable-next-line @typescript-eslint/no-empty-function
+		return [null, () => {}];
+	}
+	const { groupInfo, setGroupInfo } = groupContext;
+	return [groupInfo, setGroupInfo];
 }

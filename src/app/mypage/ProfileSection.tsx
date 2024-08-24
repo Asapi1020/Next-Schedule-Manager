@@ -3,22 +3,24 @@
 import CheckCircle from "@public/check-circle.svg";
 import EditSquare from "@public/edit.svg";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 
 import CancelButton from "@/components/CancelButton";
 import SaveButton from "@/components/SaveButton";
 import { changeUserName } from "@/lib/apiClient";
-import { useUserContext } from "@/lib/dataUtils";
+import { UserProfile } from "@/lib/schema";
 
 interface ProfileTemplate {
 	accessToken: string;
+	userInfo: UserProfile;
+	setUserInfo: Dispatch<SetStateAction<UserProfile | null>>;
 }
 
-const ProfileSection: React.FC<ProfileTemplate> = ({ accessToken }) => {
-	const [userInfo, setUserInfo] = useUserContext();
-	if (!userInfo) {
-		return null;
-	}
+const ProfileSection: React.FC<ProfileTemplate> = ({
+	accessToken,
+	userInfo,
+	setUserInfo,
+}) => {
 	const [isEditing, setIsEditing] = useState<boolean>(false);
 	const [name, setName] = useState<string>(userInfo.name);
 	const [isSaving, setIsSaving] = useState<boolean>(false);

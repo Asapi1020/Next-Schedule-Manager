@@ -4,7 +4,13 @@ import { Db, MongoClient } from "mongodb";
 import { mapToAccount, mapToBaseGroupsInfo } from "./mapper";
 
 import Result from "@/lib/Result";
-import { Account, BaseAccountInfo, User, UserProfile } from "@/lib/schema";
+import {
+	Account,
+	BaseAccountInfo,
+	Group,
+	User,
+	UserProfile,
+} from "@/lib/schema";
 
 export default class DbModel {
 	private db: Db;
@@ -143,6 +149,31 @@ export default class DbModel {
 			return {
 				statusCode: 200,
 				data: null,
+			};
+		} catch (error) {
+			return {
+				statusCode: 500,
+				data: null,
+				error: `${error}`,
+			};
+		}
+	}
+
+	public async addNewGroup(
+		adminId: string,
+		name: string,
+	): Promise<Result<Group>> {
+		try {
+			const group: Group = {
+				id: cuid(),
+				name,
+				adminId,
+				usersId: [],
+			};
+			await this.collection.group.insertOne(group);
+			return {
+				statusCode: 200,
+				data: group,
 			};
 		} catch (error) {
 			return {

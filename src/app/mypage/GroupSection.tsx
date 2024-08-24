@@ -2,13 +2,13 @@ import AddCircle from "@public/add-circle.svg";
 import ShieldCheck from "@public/shield-check.svg";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useCallback, useContext, useState } from "react";
+import { useCallback, useState } from "react";
 
 import CancelButton from "@/components/CancelButton";
-import { GroupContext } from "@/components/DataProvider";
 import SaveButton from "@/components/SaveButton";
 import { addNewGroup } from "@/lib/apiClient";
-import { GroupInfo, UserProfile } from "@/lib/schema";
+import { useGroupContext } from "@/lib/dataUtils";
+import { Group, UserProfile } from "@/lib/schema";
 
 interface GroupTemplate {
 	accessToken: string;
@@ -16,11 +16,7 @@ interface GroupTemplate {
 }
 
 const GroupSection: React.FC<GroupTemplate> = ({ accessToken, userInfo }) => {
-	const context = useContext(GroupContext);
-	if (!context) {
-		throw new Error("GroupContext must be used within a GroupProvider");
-	}
-	const { setGroupInfo } = context;
+	const [, setGroupInfo] = useGroupContext();
 	const [isEditing, setIsEditing] = useState<boolean>(false);
 	const [name, setName] = useState<string>("");
 	const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -48,7 +44,7 @@ const GroupSection: React.FC<GroupTemplate> = ({ accessToken, userInfo }) => {
 			const response = await addNewGroup(accessToken, userInfo.id, name);
 
 			if (response.status === 200) {
-				const newGroupInfo: GroupInfo = await response.json();
+				const newGroupInfo: Group = await response.json();
 				setGroupInfo(newGroupInfo);
 				router.push(`/group/${newGroupInfo.id}`);
 			} else {

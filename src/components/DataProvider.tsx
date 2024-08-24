@@ -2,7 +2,7 @@
 
 import React, { createContext, ReactNode, useEffect, useState } from "react";
 
-import { GroupInfo, UserProfile } from "@/lib/schema";
+import { Group, UserProfile } from "@/lib/schema";
 
 interface UserContextType {
 	userInfo: UserProfile | null;
@@ -10,8 +10,8 @@ interface UserContextType {
 }
 
 interface GroupContextType {
-	groupInfo: GroupInfo | null;
-	setGroupInfo: React.Dispatch<React.SetStateAction<GroupInfo | null>>;
+	groupInfo: Group | null;
+	setGroupInfo: React.Dispatch<React.SetStateAction<Group | null>>;
 }
 
 export const UserContext = createContext<UserContextType | null>(null);
@@ -42,7 +42,7 @@ function UserProvider({ children }: { children: ReactNode }) {
 }
 
 function GroupProvider({ children }: { children: ReactNode }) {
-	const [groupInfo, setGroupInfo] = useState<GroupInfo | null>(() => {
+	const [groupInfo, setGroupInfo] = useState<Group | null>(() => {
 		if (typeof window !== "undefined") {
 			const savedGroupInfo = localStorage.getItem("groupInfo");
 			return savedGroupInfo ? JSON.parse(savedGroupInfo) : null;
