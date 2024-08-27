@@ -21,6 +21,7 @@ const Calendar: React.FC<CalendarTemplate> = ({ schedules, deltaMonth }) => {
 	const [bulkDay, setBulkDay] = useState<string>("-");
 	const [bulkAvailability, setBulkAvailability] = useState<string>("〇");
 	const accessToken = getAccessToken();
+	const groupId = safeLoadGroupId();
 
 	const today = dayjs().add(deltaMonth, "month");
 	const startOfMonth = today.startOf("month");
@@ -42,7 +43,7 @@ const Calendar: React.FC<CalendarTemplate> = ({ schedules, deltaMonth }) => {
 	});
 	const availabilities = ["〇", "△", "×"];
 
-	const setupSelections = () => {
+	const setupSelections = (): Availability[] => {
 		if (schedules) {
 			return (
 				findMonthlySchedule(schedules, today.year(), today.month()) ??
@@ -52,9 +53,10 @@ const Calendar: React.FC<CalendarTemplate> = ({ schedules, deltaMonth }) => {
 		return Array.from({ length: daysInMonth }, () => "-");
 	};
 	const initialSelections = setupSelections();
-	const [selections, setSelections] = useState<string[]>(initialSelections);
+	const [selections, setSelections] =
+		useState<Availability[]>(initialSelections);
 
-	const handleSelectChange = (dayIndex: number, value: string) => {
+	const handleSelectChange = (dayIndex: number, value: Availability) => {
 		const updatedSelections = [...selections];
 		updatedSelections[dayIndex] =
 			updatedSelections[dayIndex] === value ? "-" : value;
@@ -64,9 +66,13 @@ const Calendar: React.FC<CalendarTemplate> = ({ schedules, deltaMonth }) => {
 	const handleSaveClick = async () => {
 		setIsSaving(true);
 		try {
-			const groupId = safeLoadGroupId();
-			await saveSchedules(accessToken, groupId, selections);
-			// TODO: setScheduleInfo
+			const scheduleToSave: MonthlySchedule = {
+				year: today.year(),
+				month: today.month(),
+				availabilities: selections,
+			};
+			await saveSchedules(accessToken, groupId, [scheduleToSave]);
+			// TODO: be compatible with multiple monthly data save
 			setIsSaved(true);
 		} catch (error) {
 			console.error("Failed to save the new name:", error);

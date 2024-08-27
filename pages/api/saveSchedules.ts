@@ -4,12 +4,16 @@ import DbModel from "../lib/db/DbModel";
 import clientPromise from "../lib/db/mongo";
 import ensureAuthorization from "../lib/ensureAuthorization";
 
-async function handler(req: NextApiRequest, res: NextApiResponse) {
-	const { userId, groupId, schedules } = req.body;
+async function handler(
+	req: NextApiRequest,
+	res: NextApiResponse,
+	accountId: string,
+) {
+	const { groupId, schedules } = req.body;
 	const client = await clientPromise;
 	const dbModel = new DbModel(client);
 	const saveSchedulesResult = await dbModel.saveSchedules(
-		userId,
+		accountId,
 		groupId,
 		schedules,
 	);

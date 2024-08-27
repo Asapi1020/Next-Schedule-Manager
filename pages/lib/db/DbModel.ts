@@ -200,24 +200,42 @@ export default class DbModel {
 	}
 
 	public async saveSchedules(
-		userId: string,
+		accountId: string,
 		groupId: string,
 		schedules: MonthlySchedule[],
 	): Promise<Result> {
 		try {
+			const account = await this.collection.account.findOne({ id: accountId });
+			if (!account) {
+				return {
+					statusCode: 400,
+					data: null,
+					error: "Account not found",
+				};
+			}
+
+			const user = await this.collection.user.findOne({ id: account.userId });
+			if (!user) {
+				return {
+					statusCode: 400,
+					data: null,
+					error: "User not found",
+				};
+			}
+
 			const scheduleData = await this.collection.schedule.findOne({
-				userId,
+				userId: user.id,
 				groupId,
 			});
 
 			if (scheduleData) {
 				await this.collection.schedule.updateOne(
-					{ userId: scheduleData.id, groupId: scheduleData.groupId },
+					{ userId: scheduleData.userId, groupId: scheduleData.groupId },
 					{ $set: { schedules } },
 				);
 			} else {
 				const newScheduleData: Schedule = {
-					userId,
+					userId: user.id,
 					groupId,
 					schedules,
 				};
