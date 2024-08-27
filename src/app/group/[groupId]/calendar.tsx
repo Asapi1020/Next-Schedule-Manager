@@ -5,19 +5,24 @@ import { useState } from "react";
 
 import PlayButton from "@/components/PlayButton";
 import SaveButton from "@/components/SaveButton";
-import { UserProfile } from "@/lib/schema";
+import { saveSchedules } from "@/lib/apiClient";
+import { getAccessToken } from "@/lib/dataUtils";
+import { Availability, MonthlySchedule } from "@/lib/schema";
+import { safeLoadGroupId } from "@/lib/utils";
 
 interface CalendarTemplate {
-	userInfo: UserProfile;
-	today: dayjs.Dayjs;
+	schedules: MonthlySchedule[] | undefined;
+	deltaMonth: number;
 }
 
-const Calendar: React.FC<CalendarTemplate> = ({ userInfo, today }) => {
+const Calendar: React.FC<CalendarTemplate> = ({ schedules, deltaMonth }) => {
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const [isSaved, setIsSaved] = useState<boolean>(false);
 	const [bulkDay, setBulkDay] = useState<string>("-");
 	const [bulkAvailability, setBulkAvailability] = useState<string>("〇");
+	const accessToken = getAccessToken();
 
+	const today = dayjs().add(deltaMonth, "month");
 	const startOfMonth = today.startOf("month");
 	const endOfMonth = today.endOf("month");
 	const daysInMonth = endOfMonth.date();
@@ -37,7 +42,16 @@ const Calendar: React.FC<CalendarTemplate> = ({ userInfo, today }) => {
 	});
 	const availabilities = ["〇", "△", "×"];
 
-	const initialSelections = Array.from({ length: daysInMonth }, () => "-");
+	const setupSelections = () => {
+		if (schedules) {
+			return (
+				findMonthlySchedule(schedules, today.year(), today.month()) ??
+				Array.from({ length: daysInMonth }, () => "-")
+			);
+		}
+		return Array.from({ length: daysInMonth }, () => "-");
+	};
+	const initialSelections = setupSelections();
 	const [selections, setSelections] = useState<string[]>(initialSelections);
 
 	const handleSelectChange = (dayIndex: number, value: string) => {
@@ -47,11 +61,11 @@ const Calendar: React.FC<CalendarTemplate> = ({ userInfo, today }) => {
 		setSelections(updatedSelections);
 	};
 
-	const handleSaveClick = () => {
+	const handleSaveClick = async () => {
 		setIsSaving(true);
 		try {
-			console.log(userInfo);
-			//await saveSchedules(accessToken, userInfo.id, selections);
+			const groupId = safeLoadGroupId();
+			await saveSchedules(accessToken, groupId, selections);
 			// TODO: setScheduleInfo
 			setIsSaved(true);
 		} catch (error) {
@@ -151,6 +165,18 @@ const Calendar: React.FC<CalendarTemplate> = ({ userInfo, today }) => {
 			</div>
 		</div>
 	);
+};
+
+const findMonthlySchedule = (
+	schedules: MonthlySchedule[],
+	year: number,
+	month: number,
+): Availability[] | undefined => {
+	const targetSchedule = schedules.find(
+		(schedule: MonthlySchedule) =>
+			schedule.year === year && schedule.month === month,
+	);
+	return targetSchedule?.availabilities;
 };
 
 export default Calendar;

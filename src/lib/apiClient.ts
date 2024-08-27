@@ -1,3 +1,5 @@
+import { MonthlySchedule } from "./schema";
+
 function apiUrl(endPoint: string): URL {
 	return new URL("/api" + endPoint, process.env.NEXT_PUBLIC_FRONTEND_ADDRESS);
 }
@@ -32,6 +34,25 @@ export async function fetchUserInfo(accessToken: string) {
 	return response;
 }
 
+export async function fetchGroupSchedules(
+	accessToken: string,
+	groupId: string,
+) {
+	const url = apiUrl(`/fetchGroupSchedules/${groupId}`);
+
+	// eslint-disable-next-line n/no-unsupported-features/node-builtins
+	const response = await fetch(url.toString(), {
+		method: "GET",
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: `Bearer ${accessToken}`,
+		},
+	});
+
+	return response;
+}
+
+// FIXME: quit receiving userId because client can cheat. Use fetched accountId instead
 export async function changeUserName(
 	accessToken: string,
 	userId: string,
@@ -72,6 +93,29 @@ export async function addNewGroup(
 		body: JSON.stringify({
 			userId,
 			groupName,
+		}),
+	});
+
+	return response;
+}
+
+export async function saveSchedules(
+	accessToken: string,
+	groupId: string,
+	schedules: MonthlySchedule[],
+) {
+	const url = apiUrl("/saveSchedules");
+
+	// eslint-disable-next-line n/no-unsupported-features/node-builtins
+	const response = await fetch(url.toString(), {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: `Bearer ${accessToken}`,
+		},
+		body: JSON.stringify({
+			groupId,
+			schedules,
 		}),
 	});
 

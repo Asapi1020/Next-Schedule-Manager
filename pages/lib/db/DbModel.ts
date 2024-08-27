@@ -1,13 +1,21 @@
 import { createId as cuid } from "@paralleldrive/cuid2";
 import { Db, MongoClient, PushOperator } from "mongodb";
 
-import { ensureGroup, mapToAccount, mapToBaseGroupsInfo } from "./mapper";
+import {
+	ensureGroup,
+	mapToAccount,
+	mapToBaseGroupsInfo,
+	mapToBaseSchedulesInfo,
+} from "./mapper";
 
 import Result from "@/lib/Result";
 import {
 	Account,
 	BaseAccountInfo,
 	Group,
+	GroupWithSchedules,
+	MonthlySchedule,
+	Schedule,
 	User,
 	UserProfile,
 } from "@/lib/schema";
@@ -164,7 +172,7 @@ export default class DbModel {
 		name: string,
 	): Promise<Result<Group>> {
 		try {
-			const group = {
+			const group: Group = {
 				id: cuid(),
 				name,
 				adminId,
@@ -181,6 +189,106 @@ export default class DbModel {
 			return {
 				statusCode: 200,
 				data: ensureGroup(group),
+			};
+		} catch (error) {
+			return {
+				statusCode: 500,
+				data: null,
+				error: `${error}`,
+			};
+		}
+	}
+
+	public async saveSchedules(
+		userId: string,
+		groupId: string,
+		schedules: MonthlySchedule[],
+	): Promise<Result> {
+		try {
+			const scheduleData = await this.collection.schedule.findOne({
+				userId,
+				groupId,
+			});
+
+			if (scheduleData) {
+				await this.collection.schedule.updateOne(
+					{ userId: scheduleData.id, groupId: scheduleData.groupId },
+					{ $set: { schedules } },
+				);
+			} else {
+				const newScheduleData: Schedule = {
+					userId,
+					groupId,
+					schedules,
+				};
+				await this.collection.schedule.insertOne(newScheduleData);
+			}
+
+			return {
+				statusCode: 200,
+				data: null,
+			};
+		} catch (error) {
+			return {
+				statusCode: 500,
+				data: null,
+				error: `${error}`,
+			};
+		}
+	}
+
+	public async fetchGroupSchedules(
+		accountId: string,
+		groupId: string,
+	): Promise<Result<GroupWithSchedules>> {
+		try {
+			const account = await this.collection.account.findOne({ id: accountId });
+			if (!account) {
+				return {
+					statusCode: 400,
+					data: null,
+					error: "Account not found",
+				};
+			}
+
+			const user = await this.collection.user.findOne({ id: account.userId });
+			if (!user) {
+				return {
+					statusCode: 400,
+					data: null,
+					error: "User not found",
+				};
+			}
+
+			if (!user.groupsId.includes(groupId)) {
+				return {
+					statusCode: 400,
+					data: null,
+					error: "User does not belong to the group",
+				};
+			}
+
+			const group = await this.collection.group.findOne({ id: groupId });
+			if (!group) {
+				return {
+					statusCode: 400,
+					data: null,
+					error: "Group not found",
+				};
+			}
+
+			const schedule = await this.collection.schedule
+				.find({ groupId: group.id })
+				.toArray();
+			return {
+				statusCode: 200,
+				data: {
+					id: group.id,
+					name: group.name,
+					adminId: group.adminId,
+					usersId: group.usersId,
+					scheduleData: mapToBaseSchedulesInfo(schedule),
+				},
 			};
 		} catch (error) {
 			return {

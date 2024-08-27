@@ -1,6 +1,6 @@
 import { Document, WithId } from "mongodb";
 
-import { Account, BaseGroupInfo, Group } from "@/lib/schema";
+import { Account, BaseGroupInfo, BaseScheduleInfo, Group } from "@/lib/schema";
 
 export function mapToAccount(result: WithId<Document>): Account {
 	return {
@@ -19,6 +19,17 @@ export function mapToBaseGroupsInfo(
 			id: result.id,
 			name: result.name,
 			adminId: result.adminId,
+		};
+	});
+}
+
+export function mapToBaseSchedulesInfo(
+	results: WithId<Document>[],
+): BaseScheduleInfo[] {
+	return results.map((result) => {
+		return {
+			userId: result.userId,
+			schedules: result.schedules,
 		};
 	});
 }
