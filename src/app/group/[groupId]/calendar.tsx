@@ -1,25 +1,32 @@
 "use client";
 
 import dayjs from "dayjs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import PlayButton from "@/components/PlayButton";
 import SaveButton from "@/components/SaveButton";
 import { saveSchedules } from "@/lib/apiClient";
 import { getAccessToken } from "@/lib/dataUtils";
+import { createDefaultAvailability, findSchedule } from "@/lib/scheduleUtils";
 import { Availability, MonthlySchedule } from "@/lib/schema";
 import { safeLoadGroupId } from "@/lib/utils";
 
 interface CalendarTemplate {
-	schedules: MonthlySchedule[] | undefined;
+	initialSchedules: MonthlySchedule[];
 	deltaMonth: number;
 }
 
-const Calendar: React.FC<CalendarTemplate> = ({ schedules, deltaMonth }) => {
+const Calendar: React.FC<CalendarTemplate> = ({
+	initialSchedules,
+	deltaMonth,
+}) => {
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const [isSaved, setIsSaved] = useState<boolean>(false);
 	const [bulkDay, setBulkDay] = useState<string>("-");
 	const [bulkAvailability, setBulkAvailability] = useState<string>("〇");
+	const [selections, setSelections] = useState<Availability[]>([]);
+	const [schedules, setSchedules] =
+		useState<MonthlySchedule[]>(initialSchedules);
 	const accessToken = getAccessToken();
 	const groupId = safeLoadGroupId();
 
@@ -43,36 +50,34 @@ const Calendar: React.FC<CalendarTemplate> = ({ schedules, deltaMonth }) => {
 	});
 	const availabilities = ["〇", "△", "×"];
 
-	const setupSelections = (): Availability[] => {
-		if (schedules) {
-			return (
-				findMonthlySchedule(schedules, today.year(), today.month()) ??
-				Array.from({ length: daysInMonth }, () => "-")
-			);
-		}
-		return Array.from({ length: daysInMonth }, () => "-");
-	};
-	const initialSelections = setupSelections();
-	const [selections, setSelections] =
-		useState<Availability[]>(initialSelections);
+	useEffect(() => {
+		const targetSelections = findMonthlySchedule(
+			schedules,
+			today.year(),
+			today.month(),
+		);
+		setSelections(targetSelections);
+	}, [deltaMonth]);
 
-	const handleSelectChange = (dayIndex: number, value: Availability) => {
+	const handleSelectChange = (dayIndex: number, value: string) => {
 		const updatedSelections = [...selections];
-		updatedSelections[dayIndex] =
-			updatedSelections[dayIndex] === value ? "-" : value;
+		updatedSelections[dayIndex] = (
+			updatedSelections[dayIndex] === value ? "-" : value
+		) as Availability;
 		setSelections(updatedSelections);
+
+		const updatedSchedules = updateAvailabilities(schedules, {
+			year: today.year(),
+			month: today.month(),
+			availabilities: updatedSelections,
+		});
+		setSchedules(updatedSchedules);
 	};
 
 	const handleSaveClick = async () => {
 		setIsSaving(true);
 		try {
-			const scheduleToSave: MonthlySchedule = {
-				year: today.year(),
-				month: today.month(),
-				availabilities: selections,
-			};
-			await saveSchedules(accessToken, groupId, [scheduleToSave]);
-			// TODO: be compatible with multiple monthly data save
+			await saveSchedules(accessToken, groupId, schedules);
 			setIsSaved(true);
 		} catch (error) {
 			console.error("Failed to save the new name:", error);
@@ -85,10 +90,17 @@ const Calendar: React.FC<CalendarTemplate> = ({ schedules, deltaMonth }) => {
 		const updatedSelections = selections.map((_, index) => {
 			const dayOfWeek = (startDayOfWeek + index) % 7;
 			return bulkDay === "-" || fullNameDaysOfWeek[dayOfWeek] === bulkDay
-				? value
+				? (value as Availability)
 				: selections[index];
 		});
 		setSelections(updatedSelections);
+
+		const updatedSchedules = updateAvailabilities(schedules, {
+			year: today.year(),
+			month: today.month(),
+			availabilities: updatedSelections,
+		});
+		setSchedules(updatedSchedules);
 	};
 
 	const BulkSetSection = () => {
@@ -131,7 +143,7 @@ const Calendar: React.FC<CalendarTemplate> = ({ schedules, deltaMonth }) => {
 				{daysOfWeek.map((day, i) => (
 					<div
 						key={i}
-						className={`font-bold text-center rounded p-2 tex-white ${
+						className={`font-bold text-center rounded p-2 text-white ${
 							day === "Sun" ? "bg-red-600" : ""
 						} ${
 							day === "Sat" ? "bg-blue-600" : ""
@@ -177,12 +189,27 @@ const findMonthlySchedule = (
 	schedules: MonthlySchedule[],
 	year: number,
 	month: number,
-): Availability[] | undefined => {
-	const targetSchedule = schedules.find(
-		(schedule: MonthlySchedule) =>
-			schedule.year === year && schedule.month === month,
+): Availability[] => {
+	const targetSchedule = findSchedule(schedules, year, month);
+
+	return (
+		targetSchedule?.availabilities || createDefaultAvailability(year, month)
 	);
-	return targetSchedule?.availabilities;
+};
+
+const updateAvailabilities = (
+	schedules: MonthlySchedule[],
+	newSchedule: MonthlySchedule,
+): MonthlySchedule[] => {
+	return schedules.map((schedule: MonthlySchedule) => {
+		if (
+			schedule.year === newSchedule.year &&
+			schedule.month === newSchedule.month
+		) {
+			return { ...schedule, availabilities: newSchedule.availabilities };
+		}
+		return schedule;
+	});
 };
 
 export default Calendar;

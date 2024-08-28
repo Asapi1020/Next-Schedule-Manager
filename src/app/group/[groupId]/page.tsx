@@ -10,11 +10,8 @@ import { LoadingCircle } from "@/components/LoadingCircle";
 import { fetchGroupSchedules } from "@/lib/apiClient";
 import authEffect from "@/lib/authEffect";
 import { getAccessToken, useUserContext } from "@/lib/dataUtils";
-import {
-	BaseScheduleInfo,
-	GroupWithSchedules,
-	MonthlySchedule,
-} from "@/lib/schema";
+import { findMySchedule, fixSchedule } from "@/lib/scheduleUtils";
+import { GroupWithSchedules } from "@/lib/schema";
 import { safeLoadGroupId } from "@/lib/utils";
 
 const groupPage = () => {
@@ -70,28 +67,35 @@ const groupPage = () => {
 
 	const today = dayjs();
 	const mySchedule = findMySchedule(groupSchedules, userInfo.id);
+	const fixedSchedule = fixSchedule(mySchedule);
 
 	return (
 		<div className="container mx-auto px-6 py-4">
-			<h1>GroupName</h1>
+			<h1 className="font-bold">{groupSchedules.name}</h1>
 			<div className="calendar-container">
-				<h2 className="text-xl font-bold mb-4 text-center">
-					{today.add(deltaMonth, "month").format("YYYY/MM")}
-				</h2>
-				<Calendar schedules={mySchedule} deltaMonth={deltaMonth} />
+				<div className="flex items-center justify-center mb-6">
+					<button
+						className="mr-4 text-center rounded px-4 py-1 text-white bg-gray-600 hover:bg-gray-700"
+						onClick={() => setDeltaMonth(deltaMonth - 1)}
+						disabled={deltaMonth <= 0}
+					>
+						◁
+					</button>
+					<h2 className="text-xl font-bold text-center">
+						{today.add(deltaMonth, "month").format("YYYY/MM")}
+					</h2>
+					<button
+						className="ml-4 text-center rounded px-4 py-1 text-white bg-gray-600 hover:bg-gray-700"
+						onClick={() => setDeltaMonth(deltaMonth + 1)}
+						disabled={deltaMonth >= 2}
+					>
+						▷
+					</button>
+				</div>
+				<Calendar initialSchedules={fixedSchedule} deltaMonth={deltaMonth} />
 			</div>
 		</div>
 	);
-};
-
-const findMySchedule = (
-	groupSchedules: GroupWithSchedules,
-	myUserId: string,
-): MonthlySchedule[] | undefined => {
-	const myScheduleData = groupSchedules.scheduleData.find(
-		(schedule: BaseScheduleInfo) => schedule.userId === myUserId,
-	);
-	return myScheduleData?.schedules;
 };
 
 export default groupPage;
