@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import DbModel from "../../lib/db/DbModel";
-import clientPromise from "../../lib/db/mongo";
-import ensureAuthorization from "../../lib/ensureAuthorization";
+import DbModel from "../lib/db/DbModel";
+import clientPromise from "../lib/db/mongo";
+import ensureAuthorization from "../lib/ensureAuthorization";
 
 async function handler(
 	req: NextApiRequest,

@@ -1,8 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
-import DbModel from "../../lib/db/DbModel";
-import clientPromise from "../../lib/db/mongo";
-import { fetchAccessToken, fetchAccountInfo } from "../../lib/discord/oauth";
+import DbModel from "../lib/db/DbModel";
+import clientPromise from "../lib/db/mongo";
+import { fetchAccessToken, fetchAccountInfo } from "../lib/discord/oauth";
 
 import { BaseAccountInfo } from "@/lib/schema";
 
