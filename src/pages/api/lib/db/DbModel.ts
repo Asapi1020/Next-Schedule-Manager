@@ -14,6 +14,7 @@ import {
 	BaseAccountInfo,
 	Group,
 	GroupWithSchedules,
+	Invitation,
 	MonthlySchedule,
 	Schedule,
 	User,
@@ -31,6 +32,7 @@ export default class DbModel {
 			account: this.db.collection("account"),
 			group: this.db.collection("group"),
 			schedule: this.db.collection("schedule"),
+			invitation: this.db.collection("invitation"),
 		};
 	}
 
@@ -307,6 +309,65 @@ export default class DbModel {
 					usersId: group.usersId,
 					scheduleData: mapToBaseSchedulesInfo(schedule),
 				},
+			};
+		} catch (error) {
+			return {
+				statusCode: 500,
+				data: null,
+				error: `${error}`,
+			};
+		}
+	}
+
+	public async createInvitationLink(
+		accountId: string,
+		groupId: string,
+	): Promise<Result<{ id: string }>> {
+		try {
+			const account = await this.collection.account.findOne({ id: accountId });
+			if (!account) {
+				return {
+					statusCode: 400,
+					data: null,
+					error: "Account not found",
+				};
+			}
+
+			const user = await this.collection.user.findOne({ id: account.userId });
+			if (!user) {
+				return {
+					statusCode: 400,
+					data: null,
+					error: "User not found",
+				};
+			}
+
+			const group = await this.collection.group.findOne({ id: groupId });
+			if (!group) {
+				return {
+					statusCode: 400,
+					data: null,
+					error: "Group not found",
+				};
+			}
+
+			if (group.adminId !== user.id) {
+				return {
+					statusCode: 401,
+					data: null,
+					error: "Unauthorized",
+				};
+			}
+
+			const invitation: Invitation = {
+				id: cuid(),
+				groupId,
+			};
+			await this.collection.invitation.insertOne(invitation);
+
+			return {
+				statusCode: 200,
+				data: { id: invitation.id },
 			};
 		} catch (error) {
 			return {

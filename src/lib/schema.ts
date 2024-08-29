@@ -48,6 +48,12 @@ export interface Schedule extends BaseScheduleInfo {
 	groupId: string;
 }
 
+export interface Invitation {
+	id: string;
+	groupId: string;
+	// expireDate
+}
+
 /**
  * combined complicated schema
  */

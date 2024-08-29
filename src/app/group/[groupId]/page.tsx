@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import Calendar from "./calendar";
 
 import { LoadingCircle } from "@/components/LoadingCircle";
-import { fetchGroupSchedules } from "@/lib/apiClient";
+import { createInvitationLink, fetchGroupSchedules } from "@/lib/apiClient";
 import authEffect from "@/lib/authEffect";
 import { getAccessToken, useUserContext } from "@/lib/dataUtils";
 import { findMySchedule, fixSchedule } from "@/lib/scheduleUtils";
@@ -69,9 +69,49 @@ const groupPage = () => {
 	const mySchedule = findMySchedule(groupSchedules, userInfo.id);
 	const fixedSchedule = fixSchedule(mySchedule);
 
+	const handleCopyLink = async () => {
+		try {
+			const response = await createInvitationLink(
+				accessToken,
+				groupSchedules.id,
+			);
+			if (response.status === 200) {
+				const { id: invitationId } = await response.json();
+				const link = `${process.env.NEXT_PUBLIC_FRONTEND_ADDRESS}/invite/${invitationId}`;
+				// eslint-disable-next-line n/no-unsupported-features/node-builtins
+				navigator.clipboard
+					.writeText(link)
+					.then(() => {
+						alert("Link copied to clipboard!");
+					})
+					.catch((error) => {
+						console.error("Failed to copy:", error);
+					});
+				return;
+			} else {
+				const { error } = await response.json();
+				alert(error);
+				return;
+			}
+		} catch (error) {
+			alert(error);
+		}
+	};
+
 	return (
 		<div className="container mx-auto px-6 py-4">
-			<h1 className="font-bold">{groupSchedules.name}</h1>
+			<div className="flex items-center justify-between">
+				<h1 className="font-bold">{groupSchedules.name}</h1>
+				{groupSchedules.adminId === userInfo.id && (
+					<button
+						className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+						onClick={handleCopyLink}
+					>
+						🔗 Invitation Link
+					</button>
+				)}
+			</div>
+
 			<div className="calendar-container">
 				<div className="flex items-center justify-center mb-6">
 					<button

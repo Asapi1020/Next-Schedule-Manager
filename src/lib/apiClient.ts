@@ -121,3 +121,24 @@ export async function saveSchedules(
 
 	return response;
 }
+
+export async function createInvitationLink(
+	accessToken: string,
+	groupId: string,
+) {
+	const url = apiUrl("/invitationLink/create");
+
+	// eslint-disable-next-line n/no-unsupported-features/node-builtins
+	const response = await fetch(url.toString(), {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: `Bearer ${accessToken}`,
+		},
+		body: JSON.stringify({
+			groupId,
+		}),
+	});
+
+	return response;
+}
