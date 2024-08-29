@@ -7,7 +7,7 @@ import { UserButton } from "./UserButton";
 
 export const Header = () => {
 	return (
-		<header className="header">
+		<header className="header bg-black">
 			<div>
 				<Image src={Favicon} alt="Favicon" className="w-8 h-8" />
 			</div>
