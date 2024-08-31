@@ -2,6 +2,7 @@
 
 import Favicon from "@public/favicon.svg";
 import Image from "next/image";
+import Link from "next/link";
 
 import { UserButton } from "./UserButton";
 
@@ -11,7 +12,9 @@ export const Header = () => {
 			<div>
 				<Image src={Favicon} alt="Favicon" className="w-8 h-8" />
 			</div>
-			<h1 className="text-xl font-bold">Schedule Manager</h1>
+			<Link href="/" passHref>
+				<h1 className="text-xl font-bold">Schedule Manager</h1>
+			</Link>
 			<div>
 				<UserButton></UserButton>
 			</div>
