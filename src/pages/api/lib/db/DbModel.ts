@@ -15,6 +15,7 @@ import {
 	Group,
 	GroupWithSchedules,
 	Invitation,
+	InvitationDescription,
 	MonthlySchedule,
 	Schedule,
 	User,
@@ -368,6 +369,94 @@ export default class DbModel {
 			return {
 				statusCode: 200,
 				data: { id: invitation.id },
+			};
+		} catch (error) {
+			return {
+				statusCode: 500,
+				data: null,
+				error: `${error}`,
+			};
+		}
+	}
+
+	public async fetchInvitationDescription(
+		invitationId: string,
+	): Promise<Result<InvitationDescription>> {
+		try {
+			const invitation = await this.collection.invitation.findOne({
+				id: invitationId,
+			});
+			const groupId = invitation?.groupId;
+			if (!groupId) {
+				return {
+					statusCode: 400,
+					data: null,
+					error: "Group not found",
+				};
+			}
+
+			const group = await this.collection.group.findOne({ id: groupId });
+			if (!group) {
+				return {
+					statusCode: 400,
+					data: null,
+					error: "Group not found",
+				};
+			}
+
+			return {
+				statusCode: 200,
+				data: {
+					groupId,
+					groupName: group.name,
+				},
+			};
+		} catch (error) {
+			return {
+				statusCode: 500,
+				data: null,
+				error: `${error}`,
+			};
+		}
+	}
+
+	public async joinGroup(accountId: string, groupId: string): Promise<Result> {
+		try {
+			const account = await this.collection.account.findOne({ id: accountId });
+			if (!account) {
+				return {
+					statusCode: 400,
+					data: null,
+					error: "Account not found",
+				};
+			}
+
+			const user = await this.collection.user.findOne({
+				id: account.userId,
+			});
+			if (!user) {
+				return {
+					statusCode: 400,
+					data: null,
+					error: "User not found",
+				};
+			}
+
+			const pushGroupIntoUser: PushOperator<Document> = { groupsId: groupId };
+			await this.collection.user.updateOne(
+				{ id: user.id },
+				{ $push: pushGroupIntoUser },
+			);
+
+			const pushUserIntoGroup: PushOperator<Document> = { usersId: user.id };
+			await this.collection.group.updateOne(
+				{ id: groupId },
+				{ $push: pushUserIntoGroup },
+			);
+
+			return {
+				statusCode: 200,
+				data: null,
 			};
 		} catch (error) {
 			return {

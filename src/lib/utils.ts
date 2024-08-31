@@ -1,10 +1,15 @@
 import { useParams } from "next/navigation";
 
-export const safeLoadGroupId = (): string => {
+export const safeLoadParam = (paramName: string): string => {
 	const params = useParams();
-	const groupId = params?.groupId;
-	if (typeof groupId !== "string") {
+	if (!params) {
 		return "";
 	}
-	return groupId;
+
+	const paramValue = params[paramName];
+	if (typeof paramValue !== "string") {
+		return "";
+	}
+
+	return paramValue;
 };

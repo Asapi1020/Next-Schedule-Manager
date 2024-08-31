@@ -19,6 +19,20 @@ export async function signInWithDiscord(code: string) {
 	return response;
 }
 
+export async function fetchInvitationDescription(invitationId: string) {
+	const url = apiUrl(`/invitation/${invitationId}/description`);
+
+	// eslint-disable-next-line n/no-unsupported-features/node-builtins
+	const response = await fetch(url.toString(), {
+		method: "GET",
+		headers: {
+			"Content-Type": "application/json",
+		},
+	});
+
+	return response;
+}
+
 export async function fetchUserInfo(accessToken: string) {
 	const url = apiUrl("/fetchUserInfo");
 
@@ -126,7 +140,7 @@ export async function createInvitationLink(
 	accessToken: string,
 	groupId: string,
 ) {
-	const url = apiUrl("/invitationLink/create");
+	const url = apiUrl("/invitation/create");
 
 	// eslint-disable-next-line n/no-unsupported-features/node-builtins
 	const response = await fetch(url.toString(), {
@@ -138,6 +152,21 @@ export async function createInvitationLink(
 		body: JSON.stringify({
 			groupId,
 		}),
+	});
+
+	return response;
+}
+
+export async function joinGroup(accessToken: string, groupId: string) {
+	const url = apiUrl(`/group/${groupId}/join`);
+
+	// eslint-disable-next-line n/no-unsupported-features/node-builtins
+	const response = await fetch(url.toString(), {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: `Bearer ${accessToken}`,
+		},
 	});
 
 	return response;

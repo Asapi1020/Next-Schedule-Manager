@@ -12,7 +12,7 @@ import authEffect from "@/lib/authEffect";
 import { getAccessToken, useUserContext } from "@/lib/dataUtils";
 import { findMySchedule, fixSchedule } from "@/lib/scheduleUtils";
 import { GroupWithSchedules } from "@/lib/schema";
-import { safeLoadGroupId } from "@/lib/utils";
+import { safeLoadParam } from "@/lib/utils";
 
 const groupPage = () => {
 	const [userInfo, setUserInfo] = useUserContext();
@@ -23,7 +23,7 @@ const groupPage = () => {
 	const accessToken = getAccessToken();
 
 	const router = useRouter();
-	const groupId = safeLoadGroupId();
+	const groupId = safeLoadParam("groupId");
 
 	authEffect(accessToken, setLoading, userInfo, setUserInfo);
 
@@ -77,7 +77,7 @@ const groupPage = () => {
 			);
 			if (response.status === 200) {
 				const { id: invitationId } = await response.json();
-				const link = `${process.env.NEXT_PUBLIC_FRONTEND_ADDRESS}/invite/${invitationId}`;
+				const link = `${process.env.NEXT_PUBLIC_FRONTEND_ADDRESS}/invitation/${invitationId}`;
 				// eslint-disable-next-line n/no-unsupported-features/node-builtins
 				navigator.clipboard
 					.writeText(link)

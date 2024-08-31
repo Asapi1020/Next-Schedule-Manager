@@ -69,3 +69,9 @@ export interface UserProfile {
 export interface GroupWithSchedules extends Group {
 	scheduleData: BaseScheduleInfo[];
 }
+
+// to display what this invitation is
+export interface InvitationDescription {
+	groupId: string;
+	groupName: string;
+}

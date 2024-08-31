@@ -3,9 +3,11 @@
 import DiscordLogo from "@public/discord.svg";
 import Image from "next/image";
 import React from "react";
+import { useCookies } from "react-cookie";
 
 interface CustomButtonProps {
 	label: string;
+	invitationId?: string;
 }
 
 const jump = () => {
@@ -26,9 +28,24 @@ const jump = () => {
 	);
 };
 
-export const LoginButton: React.FC<CustomButtonProps> = ({ label }) => {
+export const LoginButton: React.FC<CustomButtonProps> = ({
+	label,
+	invitationId,
+}) => {
+	const [, setCookie] = useCookies(["invitation_id"]);
+
+	const handleClickLogin = () => {
+		if (invitationId) {
+			setCookie("invitation_id", invitationId, { path: "/" });
+		}
+		jump();
+	};
+
 	return (
-		<button onClick={jump} className="discord-login-button flex items-center">
+		<button
+			onClick={handleClickLogin}
+			className="discord-login-button flex items-center"
+		>
 			<Image src={DiscordLogo} alt="Discord Logo" className="w-6 h-6 mr-2" />
 			{label}
 		</button>

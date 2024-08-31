@@ -6,9 +6,13 @@ import { Group, UserProfile } from "./schema";
 import { GroupContext, UserContext } from "@/components/DataProvider";
 
 export function getAccessToken(): string {
+	return getCookieValue("access_token");
+}
+
+export function getCookieValue(cookieName: string): string {
 	const [cookies] = useCookies<string>();
-	const accessToken = cookies.access_token;
-	return accessToken;
+	const cookieValue = cookies[cookieName];
+	return cookieValue ?? "";
 }
 
 export function useUserContext(): [

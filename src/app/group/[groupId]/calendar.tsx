@@ -9,7 +9,7 @@ import { saveSchedules } from "@/lib/apiClient";
 import { getAccessToken } from "@/lib/dataUtils";
 import { createDefaultAvailability, findSchedule } from "@/lib/scheduleUtils";
 import { Availability, MonthlySchedule } from "@/lib/schema";
-import { safeLoadGroupId } from "@/lib/utils";
+import { safeLoadParam } from "@/lib/utils";
 
 interface CalendarTemplate {
 	initialSchedules: MonthlySchedule[];
@@ -28,7 +28,7 @@ const Calendar: React.FC<CalendarTemplate> = ({
 	const [schedules, setSchedules] =
 		useState<MonthlySchedule[]>(initialSchedules);
 	const accessToken = getAccessToken();
-	const groupId = safeLoadGroupId();
+	const groupId = safeLoadParam("groupId");
 
 	const today = dayjs().add(deltaMonth, "month");
 	const startOfMonth = today.startOf("month");

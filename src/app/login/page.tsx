@@ -5,14 +5,20 @@ import { useCookies } from "react-cookie";
 
 import { LoadingCircle } from "@/components/LoadingCircle";
 import { signInWithDiscord } from "@/lib/apiClient";
+import { getCookieValue } from "@/lib/dataUtils";
 
 function ObtainLogin() {
 	const [, setCookie] = useCookies(["access_token"]);
 	const router = useRouter();
 	const searchParams = useSearchParams();
+	const invitationId = getCookieValue("invitation_id");
+	const removeCookie = useCookies(["invitation_id"])[2];
 
 	useEffect(() => {
 		const handleLogin = async () => {
+			removeCookie("invitation_id", {
+				path: "/",
+			});
 			try {
 				const code = searchParams?.get("code") ?? null;
 				if (!code) {
@@ -27,7 +33,7 @@ function ObtainLogin() {
 					setCookie("access_token", accessToken, {
 						path: "/",
 					});
-					router.push("/mypage");
+					router.push(invitationId ? `/invitation/${invitationId}` : "/mypage");
 					return;
 				} else {
 					router.push("/");
