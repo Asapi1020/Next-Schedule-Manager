@@ -1,6 +1,8 @@
 "use client";
 
+import CheckCircle from "@public/check-circle.svg";
 import dayjs from "dayjs";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import PlayButton from "@/components/PlayButton";
@@ -179,7 +181,21 @@ const Calendar: React.FC<CalendarTemplate> = ({
 				})}
 			</div>
 			<div className="flex justify-center items-center container mx-auto p-4">
-				<SaveButton isSaving={isSaving} onClick={handleSaveClick} />
+				<div>
+					<div className="mb-2">
+						<SaveButton isSaving={isSaving} onClick={handleSaveClick} />
+					</div>
+					{isSaved && (
+						<div className="flex items-center">
+							<Image
+								src={CheckCircle}
+								alt="check circle"
+								className="w-6 h-6 mr-1"
+							/>
+							<p className="text-green-500 text-sm">Saved.</p>
+						</div>
+					)}
+				</div>
 			</div>
 		</div>
 	);

@@ -66,6 +66,22 @@ export async function fetchGroupSchedules(
 	return response;
 }
 
+export async function fetchUserNames(accessToken: string, usersId: string[]) {
+	const url = apiUrl("/user");
+	url.searchParams.append("ids", usersId.join(","));
+
+	// eslint-disable-next-line n/no-unsupported-features/node-builtins
+	const response = await fetch(url.toString(), {
+		method: "GET",
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: `Bearer ${accessToken}`,
+		},
+	});
+
+	return response;
+}
+
 // FIXME: quit receiving userId because client can cheat. Use fetched accountId instead
 export async function changeUserName(
 	accessToken: string,

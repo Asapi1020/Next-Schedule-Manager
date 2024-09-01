@@ -65,7 +65,9 @@ const ProfileSection: React.FC<ProfileTemplate> = ({
 				/>
 				<div className="flex items-center">
 					<CancelButton onClick={handleCancelClick} />
-					<SaveButton isSaving={isSaving} onClick={handleSaveClick} />
+					<div className="ml-4">
+						<SaveButton isSaving={isSaving} onClick={handleSaveClick} />
+					</div>
 				</div>
 			</div>
 		);

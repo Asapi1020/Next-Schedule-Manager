@@ -5,12 +5,13 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import Calendar from "./calendar";
+import Table from "./table";
 
 import { LoadingCircle } from "@/components/LoadingCircle";
 import { createInvitationLink, fetchGroupSchedules } from "@/lib/apiClient";
 import authEffect from "@/lib/authEffect";
 import { getAccessToken, useUserContext } from "@/lib/dataUtils";
-import { findMySchedule, fixSchedule } from "@/lib/scheduleUtils";
+import { findMySchedule, fixSchedules } from "@/lib/scheduleUtils";
 import { GroupWithSchedules } from "@/lib/schema";
 import { safeLoadParam } from "@/lib/utils";
 
@@ -20,6 +21,7 @@ const groupPage = () => {
 	const [deltaMonth, setDeltaMonth] = useState<number>(0);
 	const [groupSchedules, setGroupSchedules] =
 		useState<GroupWithSchedules | null>(null);
+	const [isCalendarView, setIsCalendarView] = useState<boolean>(true);
 	const accessToken = getAccessToken();
 
 	const router = useRouter();
@@ -33,7 +35,11 @@ const groupPage = () => {
 				const response = await fetchGroupSchedules(accessToken, groupId);
 				if (response.status === 200) {
 					const fetchedData: GroupWithSchedules = await response.json();
-					setGroupSchedules(fetchedData);
+					const fixedData: GroupWithSchedules = {
+						...fetchedData,
+						scheduleData: fixSchedules(fetchedData.scheduleData),
+					};
+					setGroupSchedules(fixedData);
 					return;
 				} else {
 					const { error } = await response.json();
@@ -67,7 +73,6 @@ const groupPage = () => {
 
 	const today = dayjs();
 	const mySchedule = findMySchedule(groupSchedules, userInfo.id);
-	const fixedSchedule = fixSchedule(mySchedule);
 
 	const handleCopyLink = async () => {
 		try {
@@ -98,10 +103,26 @@ const groupPage = () => {
 		}
 	};
 
+	const toggleViewMode = () => {
+		setIsCalendarView(!isCalendarView);
+	};
+
 	return (
 		<div className="container mx-auto px-6 py-4">
 			<div className="flex items-center justify-between">
-				<h1 className="font-bold">{groupSchedules.name}</h1>
+				<div>
+					<h1 className="font-bold">{groupSchedules.name}</h1>
+					<div className="mt-4">
+						<button
+							className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 border"
+							onClick={toggleViewMode}
+						>
+							{isCalendarView
+								? "Table view (*alpha: 編集途中の内容は失われます)"
+								: "Calendar view"}
+						</button>
+					</div>
+				</div>
 				{groupSchedules.adminId === userInfo.id && (
 					<button
 						className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
@@ -132,7 +153,14 @@ const groupPage = () => {
 						▷
 					</button>
 				</div>
-				<Calendar initialSchedules={fixedSchedule} deltaMonth={deltaMonth} />
+				{isCalendarView ? (
+					<Calendar initialSchedules={mySchedule} deltaMonth={deltaMonth} />
+				) : (
+					<Table
+						scheduleData={groupSchedules.scheduleData}
+						deltaMonth={deltaMonth}
+					></Table>
+				)}
 			</div>
 		</div>
 	);

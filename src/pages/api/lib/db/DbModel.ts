@@ -27,7 +27,7 @@ export default class DbModel {
 	private collection;
 
 	public constructor(client: MongoClient) {
-		this.db = client.db("schedule-manager");
+		this.db = client.db(process.env.DB_NAME);
 		this.collection = {
 			user: this.db.collection("user"),
 			account: this.db.collection("account"),
@@ -457,6 +457,49 @@ export default class DbModel {
 			return {
 				statusCode: 200,
 				data: null,
+			};
+		} catch (error) {
+			return {
+				statusCode: 500,
+				data: null,
+				error: `${error}`,
+			};
+		}
+	}
+
+	public async fetchUserNames(
+		accountId: string,
+		ids: string[],
+	): Promise<Result<{ names: string[] }>> {
+		try {
+			const account = await this.collection.account.findOne({ id: accountId });
+			if (!account) {
+				return {
+					statusCode: 400,
+					data: null,
+					error: "Account not found",
+				};
+			}
+
+			const user = await this.collection.user.findOne({
+				id: account.userId,
+			});
+			if (!user) {
+				return {
+					statusCode: 400,
+					data: null,
+					error: "User not found",
+				};
+			}
+
+			const users = await this.collection.user
+				.find({ id: { $in: ids } })
+				.toArray();
+			const names = users.map((user) => user?.name ?? "Error");
+
+			return {
+				statusCode: 200,
+				data: { names },
 			};
 		} catch (error) {
 			return {

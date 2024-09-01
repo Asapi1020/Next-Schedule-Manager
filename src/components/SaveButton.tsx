@@ -13,7 +13,7 @@ const SaveButton: React.FC<SaveButtonProps> = ({ isSaving, onClick }) => {
 	return (
 		<button
 			onClick={onClick}
-			className={`text-white py-2 px-3 rounded ml-4 ${
+			className={`text-white py-2 px-3 rounded ${
 				isSaving
 					? "bg-gray-600 cursor-not-allowed"
 					: "bg-green-600 hover:bg-green-700"

@@ -21,6 +21,7 @@ export const fixSchedule = (
 	const now = new Date();
 	const currentYear = now.getFullYear();
 	const currentMonth = now.getMonth();
+	const fixedSchedule = [];
 
 	for (let i = 0; i < 3; i++) {
 		const checkYear = currentYear + Math.floor((currentMonth + i) / 12);
@@ -28,8 +29,10 @@ export const fixSchedule = (
 
 		const schedule = findSchedule(schedules, checkYear, checkMonth);
 
-		if (!schedule) {
-			schedules.push({
+		if (schedule) {
+			fixedSchedule.push(schedule);
+		} else {
+			fixedSchedule.push({
 				year: checkYear,
 				month: checkMonth,
 				availabilities: createDefaultAvailability(checkYear, checkMonth),
@@ -37,7 +40,14 @@ export const fixSchedule = (
 		}
 	}
 
-	return schedules;
+	return fixedSchedule;
+};
+
+export const fixSchedules = (scheduleData: BaseScheduleInfo[]) => {
+	return scheduleData.map((scheduleDatum: BaseScheduleInfo) => {
+		scheduleDatum.schedules = fixSchedule(scheduleDatum.schedules);
+		return scheduleDatum;
+	});
 };
 
 export const findSchedule = (

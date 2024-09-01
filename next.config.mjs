@@ -5,6 +5,7 @@ const nextConfig = {
 		DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
 		NEXT_PUBLIC_FRONTEND_ADDRESS: process.env.NEXT_PUBLIC_FRONTEND_ADDRESS,
 		MONGO_DB_URI: process.env.MONGO_DB_URI,
+		DB_NAME: process.env.DB_NAME,
 	},
 	reactStrictMode: false,
 	trailingSlash: true,
