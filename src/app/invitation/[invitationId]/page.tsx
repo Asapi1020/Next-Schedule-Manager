@@ -5,9 +5,13 @@ import { useEffect, useState } from "react";
 
 import { LoadingCircle } from "@/components/LoadingCircle";
 import { LoginButton } from "@/components/LoginButton";
-import { fetchInvitationDescription, joinGroup } from "@/lib/apiClient";
+import {
+	fetchInvitationDescription,
+	fetchUserInfo,
+	joinGroup,
+} from "@/lib/apiClient";
 import { getAccessToken } from "@/lib/dataUtils";
-import { InvitationDescription } from "@/lib/schema";
+import { InvitationDescription, UserProfile } from "@/lib/schema";
 import { safeLoadParam } from "@/lib/utils";
 
 const invitationPage = () => {
@@ -20,6 +24,21 @@ const invitationPage = () => {
 	const router = useRouter();
 
 	useEffect(() => {
+		const checkAlreadyJoined = async (groupId: string): Promise<boolean> => {
+			try {
+				const response = await fetchUserInfo(accessToken);
+				if (response.status !== 200) {
+					return false;
+				}
+
+				const userProfile: UserProfile = await response.json();
+				return userProfile.groups.some((group) => group.id === groupId);
+			} catch (error) {
+				console.error(error);
+				return false;
+			}
+		};
+
 		const fetchGroupId = async () => {
 			setIsLoading(true);
 			try {
@@ -28,6 +47,13 @@ const invitationPage = () => {
 				if (response.status === 200) {
 					const fetchedDescription = await response.json();
 					setDescription(fetchedDescription);
+
+					const bAlreadyJoined = await checkAlreadyJoined(
+						fetchedDescription.groupId,
+					);
+					if (bAlreadyJoined) {
+						router.push(`/group/${fetchedDescription.groupId}`);
+					}
 				} else {
 					const { error } = await response.json();
 					console.error(error);

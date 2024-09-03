@@ -436,6 +436,14 @@ export default class DbModel {
 				};
 			}
 
+			if (user.groupsId.includes(groupId)) {
+				return {
+					statusCode: 400,
+					data: null,
+					error: "Bad Request",
+				};
+			}
+
 			const pushGroupIntoUser: PushOperator<Document> = { groupsId: groupId };
 			await this.collection.user.updateOne(
 				{ id: user.id },
@@ -461,7 +469,7 @@ export default class DbModel {
 		}
 	}
 
-	public async fetchUserNames(
+	public async fetchUsers(
 		accountId: string,
 		ids: string[],
 	): Promise<Result<User[]>> {
