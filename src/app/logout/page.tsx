@@ -11,6 +11,7 @@ export default function Home() {
 		removeCookie("access_token", {
 			path: "/",
 		});
+		localStorage.removeItem("userInfo");
 
 		router.push("/");
 	});
