@@ -11,8 +11,17 @@ import { LoadingCircle } from "@/components/LoadingCircle";
 import { createInvitationLink, fetchGroupSchedules } from "@/lib/apiClient";
 import authEffect from "@/lib/authEffect";
 import { getAccessToken, useUserContext } from "@/lib/dataUtils";
-import { findMySchedule, fixSchedules } from "@/lib/scheduleUtils";
-import { GroupWithSchedules } from "@/lib/schema";
+import {
+	createDefaultAvailability,
+	findMySchedule,
+	findSchedule,
+	fixSchedules,
+} from "@/lib/scheduleUtils";
+import {
+	Availability,
+	GroupWithSchedules,
+	MonthlySchedule,
+} from "@/lib/schema";
 import { safeLoadParam } from "@/lib/utils";
 
 const groupPage = () => {
@@ -22,10 +31,15 @@ const groupPage = () => {
 	const [groupSchedules, setGroupSchedules] =
 		useState<GroupWithSchedules | null>(null);
 	const [isCalendarView, setIsCalendarView] = useState<boolean>(true);
+
+	const [schedules, setSchedules] = useState<MonthlySchedule[]>([]);
+	const [selections, setSelections] = useState<Availability[]>([]);
+
 	const accessToken = getAccessToken();
 
 	const router = useRouter();
 	const groupId = safeLoadParam("groupId");
+	const today = dayjs();
 
 	authEffect(accessToken, setLoading, userInfo, setUserInfo);
 
@@ -40,6 +54,11 @@ const groupPage = () => {
 						scheduleData: fixSchedules(fetchedData.scheduleData),
 					};
 					setGroupSchedules(fixedData);
+
+					if (userInfo) {
+						const mySchedule = findMySchedule(fixedData, userInfo.id);
+						setSchedules(mySchedule);
+					}
 					return;
 				} else {
 					const { error } = await response.json();
@@ -56,6 +75,16 @@ const groupPage = () => {
 		fetchGroupSchedulesData();
 	}, []);
 
+	useEffect(() => {
+		const targetToday = dayjs().add(deltaMonth, "month");
+		const targetSelections = findMonthlySchedule(
+			schedules,
+			targetToday.year(),
+			targetToday.month(),
+		);
+		setSelections(targetSelections);
+	}, [groupSchedules, deltaMonth]);
+
 	if (loading || !groupSchedules) {
 		return (
 			<div className="flex justify-center items-center container mx-auto p-4">
@@ -70,9 +99,6 @@ const groupPage = () => {
 			<div className="container mx-auto p-4">Failed to fetch Info info</div>
 		);
 	}
-
-	const today = dayjs();
-	const mySchedule = findMySchedule(groupSchedules, userInfo.id);
 
 	const handleCopyLink = async () => {
 		try {
@@ -109,7 +135,7 @@ const groupPage = () => {
 
 	return (
 		<div className="container mx-auto px-6 py-4">
-			<div className="flex items-center justify-between">
+			<div className="flex items-center justify-between mb-1">
 				<div>
 					<h1 className="font-bold">{groupSchedules.name}</h1>
 					<div className="mt-4">
@@ -117,9 +143,7 @@ const groupPage = () => {
 							className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 border"
 							onClick={toggleViewMode}
 						>
-							{isCalendarView
-								? "Table view (*alpha: 編集途中の内容は失われます)"
-								: "Calendar view"}
+							{isCalendarView ? "Table view" : "Calendar view"}
 						</button>
 					</div>
 				</div>
@@ -154,7 +178,11 @@ const groupPage = () => {
 					</button>
 				</div>
 				{isCalendarView ? (
-					<Calendar initialSchedules={mySchedule} deltaMonth={deltaMonth} />
+					<Calendar
+						deltaMonth={deltaMonth}
+						selectionState={[selections, setSelections]}
+						schedulesState={[schedules, setSchedules]}
+					/>
 				) : (
 					<Table
 						scheduleData={groupSchedules.scheduleData}
@@ -167,3 +195,15 @@ const groupPage = () => {
 };
 
 export default groupPage;
+
+const findMonthlySchedule = (
+	schedules: MonthlySchedule[],
+	year: number,
+	month: number,
+): Availability[] => {
+	const targetSchedule = findSchedule(schedules, year, month);
+
+	return (
+		targetSchedule?.availabilities || createDefaultAvailability(year, month)
+	);
+};

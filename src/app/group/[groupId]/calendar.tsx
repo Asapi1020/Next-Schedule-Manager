@@ -3,32 +3,35 @@
 import CheckCircle from "@public/check-circle.svg";
 import dayjs from "dayjs";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 
 import PlayButton from "@/components/PlayButton";
 import SaveButton from "@/components/SaveButton";
 import { saveSchedules } from "@/lib/apiClient";
 import { getAccessToken } from "@/lib/dataUtils";
-import { createDefaultAvailability, findSchedule } from "@/lib/scheduleUtils";
 import { Availability, MonthlySchedule } from "@/lib/schema";
 import { safeLoadParam } from "@/lib/utils";
 
 interface CalendarTemplate {
-	initialSchedules: MonthlySchedule[];
 	deltaMonth: number;
+	selectionState: [Availability[], Dispatch<SetStateAction<Availability[]>>];
+	schedulesState: [
+		MonthlySchedule[],
+		Dispatch<SetStateAction<MonthlySchedule[]>>,
+	];
 }
 
 const Calendar: React.FC<CalendarTemplate> = ({
-	initialSchedules,
 	deltaMonth,
+	selectionState,
+	schedulesState,
 }) => {
 	const [isSaving, setIsSaving] = useState<boolean>(false);
 	const [isSaved, setIsSaved] = useState<boolean>(false);
 	const [bulkDay, setBulkDay] = useState<string>("-");
 	const [bulkAvailability, setBulkAvailability] = useState<string>("〇");
-	const [selections, setSelections] = useState<Availability[]>([]);
-	const [schedules, setSchedules] =
-		useState<MonthlySchedule[]>(initialSchedules);
+	const [selections, setSelections] = selectionState;
+	const [schedules, setSchedules] = schedulesState;
 	const accessToken = getAccessToken();
 	const groupId = safeLoadParam("groupId");
 
@@ -51,15 +54,6 @@ const Calendar: React.FC<CalendarTemplate> = ({
 		return day.slice(0, 3);
 	});
 	const availabilities = ["〇", "△", "×"];
-
-	useEffect(() => {
-		const targetSelections = findMonthlySchedule(
-			schedules,
-			today.year(),
-			today.month(),
-		);
-		setSelections(targetSelections);
-	}, [deltaMonth]);
 
 	const handleSelectChange = (dayIndex: number, value: string) => {
 		const updatedSelections = [...selections];
@@ -198,18 +192,6 @@ const Calendar: React.FC<CalendarTemplate> = ({
 				</div>
 			</div>
 		</div>
-	);
-};
-
-const findMonthlySchedule = (
-	schedules: MonthlySchedule[],
-	year: number,
-	month: number,
-): Availability[] => {
-	const targetSchedule = findSchedule(schedules, year, month);
-
-	return (
-		targetSchedule?.availabilities || createDefaultAvailability(year, month)
 	);
 };
 
