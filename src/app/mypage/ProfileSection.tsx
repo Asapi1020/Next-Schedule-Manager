@@ -43,7 +43,7 @@ const ProfileSection: React.FC<ProfileTemplate> = ({
 	const handleSaveClick = async () => {
 		setIsSaving(true);
 		try {
-			await changeUserName(accessToken, userInfo.id, name);
+			await changeUserName(accessToken, name);
 			setUserInfo({ ...userInfo, name });
 			setIsEditing(false);
 			setIsSaved(true);

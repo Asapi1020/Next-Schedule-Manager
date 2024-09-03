@@ -46,7 +46,7 @@ const GroupSection: React.FC<GroupTemplate> = ({
 	const handleSaveClick = useCallback(async () => {
 		setIsSaving(true);
 		try {
-			const response = await addNewGroup(accessToken, userInfo.id, name);
+			const response = await addNewGroup(accessToken, name);
 
 			if (response.status === 200) {
 				const newGroupInfo: Group = await response.json();
