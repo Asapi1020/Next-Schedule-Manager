@@ -20,10 +20,7 @@ async function handler(
 		return res.status(400).json({ error: "Bad Request" });
 	}
 
-	const fetchNamesResult = await dbModel.fetchUserNames(
-		accountId,
-		ids.split(","),
-	);
+	const fetchNamesResult = await dbModel.fetchUsers(accountId, ids.split(","));
 	if (fetchNamesResult.statusCode !== 200) {
 		return res.status(fetchNamesResult.statusCode).json({
 			error: fetchNamesResult.error,
