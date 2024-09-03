@@ -2,11 +2,18 @@ import AddCircle from "@public/add-circle.svg";
 import ShieldCheck from "@public/shield-check.svg";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Dispatch, SetStateAction, useCallback, useState } from "react";
+import {
+	Dispatch,
+	SetStateAction,
+	useCallback,
+	useEffect,
+	useState,
+} from "react";
 
 import CancelButton from "@/components/CancelButton";
 import SaveButton from "@/components/SaveButton";
 import { addNewGroup } from "@/lib/apiClient";
+import { OWN_GROUP_LIMIT } from "@/lib/config";
 import { useGroupContext } from "@/lib/dataUtils";
 import { Group, UserProfile } from "@/lib/schema";
 
@@ -25,6 +32,14 @@ const GroupSection: React.FC<GroupTemplate> = ({
 	const [isEditing, setIsEditing] = useState<boolean>(false);
 	const [name, setName] = useState<string>("");
 	const [isSaving, setIsSaving] = useState<boolean>(false);
+	const [ownGroupNum, setOwnGroupNum] = useState<number>(0);
+
+	useEffect(() => {
+		const ownGroups = userInfo.groups.filter(
+			(group) => group.adminId === userInfo.id,
+		);
+		setOwnGroupNum(ownGroups.length);
+	}, [userInfo]);
 
 	const router = useRouter();
 
@@ -106,7 +121,7 @@ const GroupSection: React.FC<GroupTemplate> = ({
 				) : (
 					<button
 						onClick={handleAddClick}
-						className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700"
+						className={`text-white py-2 px-4 rounded ${ownGroupNum >= OWN_GROUP_LIMIT ? "bg-gray-600 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"}`}
 					>
 						<div className="flex items-center">
 							<Image
@@ -119,6 +134,10 @@ const GroupSection: React.FC<GroupTemplate> = ({
 					</button>
 				)}
 			</div>
+			<p className="text-gray-200 text-right text-sm mb-4">
+				Remaining groups to create: {OWN_GROUP_LIMIT - ownGroupNum}/
+				{OWN_GROUP_LIMIT}
+			</p>
 			{isEditing && (
 				<div className="flex items-center mb-4 bg-gray-600 rounded-lg p-6 shadow-lg">
 					<p className="text-gray-200 mr-4 text-lg">Group Name: </p>

@@ -10,6 +10,7 @@ import {
 	mapToUsers,
 } from "./mapper";
 
+import { OWN_GROUP_LIMIT } from "@/lib/config";
 import Result from "@/lib/Result";
 import {
 	Account,
@@ -195,6 +196,17 @@ export default class DbModel {
 					statusCode: 401,
 					data: null,
 					error: "Unauthorized",
+				};
+			}
+
+			const groups = await this.collection.group
+				.find({ adminId: admin.id })
+				.toArray();
+			if (groups.length >= OWN_GROUP_LIMIT) {
+				return {
+					statusCode: 400,
+					data: null,
+					error: "Bad Request",
 				};
 			}
 
