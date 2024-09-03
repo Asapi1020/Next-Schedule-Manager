@@ -31,6 +31,9 @@ function ObtainLogin() {
 				if (response.status === 200) {
 					const { accessToken } = await response.json();
 					setCookie("access_token", accessToken, {
+						httpOnly: true,
+						maxAge: 60 * 60 * 24 * 7,
+						sameSite: "lax",
 						path: "/",
 					});
 					router.push(invitationId ? `/invitation/${invitationId}` : "/mypage");
