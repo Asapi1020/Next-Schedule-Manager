@@ -7,6 +7,7 @@ import {
 	mapToBaseGroupsInfo,
 	mapToBaseSchedulesInfo,
 	mapToUser,
+	mapToUsers,
 } from "./mapper";
 
 import Result from "@/lib/Result";
@@ -120,7 +121,7 @@ export default class DbModel {
 				};
 			}
 
-			const user = await this.collection.user.findOne({ id: account.userId });
+			const user = await this.fetchUserFromAccountId(accountId);
 			if (!user) {
 				return {
 					statusCode: 500,
@@ -155,9 +156,21 @@ export default class DbModel {
 		}
 	}
 
-	public async changeUserName(id: string, name: string): Promise<Result> {
+	public async changeUserName(
+		accountId: string,
+		name: string,
+	): Promise<Result> {
 		try {
-			await this.collection.user.updateOne({ id }, { $set: { name } });
+			const user = await this.fetchUserFromAccountId(accountId);
+			if (!user) {
+				return {
+					statusCode: 401,
+					data: null,
+					error: "Unauthorized",
+				};
+			}
+
+			await this.collection.user.updateOne({ id: user.id }, { $set: { name } });
 			return {
 				statusCode: 200,
 				data: null,
@@ -172,21 +185,30 @@ export default class DbModel {
 	}
 
 	public async addNewGroup(
-		adminId: string,
+		accountId: string,
 		name: string,
 	): Promise<Result<Group>> {
 		try {
+			const admin = await this.fetchUserFromAccountId(accountId);
+			if (!admin) {
+				return {
+					statusCode: 401,
+					data: null,
+					error: "Unauthorized",
+				};
+			}
+
 			const group: Group = {
 				id: cuid(),
 				name,
-				adminId,
-				usersId: [adminId],
+				adminId: admin.id,
+				usersId: [admin.id],
 			};
 			await this.collection.group.insertOne(group);
 
 			const pushOperator: PushOperator<Document> = { groupsId: group.id };
 			await this.collection.user.updateOne(
-				{ id: adminId },
+				{ id: admin.id },
 				{ $push: pushOperator },
 			);
 
@@ -209,21 +231,12 @@ export default class DbModel {
 		schedules: MonthlySchedule[],
 	): Promise<Result> {
 		try {
-			const account = await this.collection.account.findOne({ id: accountId });
-			if (!account) {
-				return {
-					statusCode: 400,
-					data: null,
-					error: "Account not found",
-				};
-			}
-
-			const user = await this.collection.user.findOne({ id: account.userId });
+			const user = await this.fetchUserFromAccountId(accountId);
 			if (!user) {
 				return {
-					statusCode: 400,
+					statusCode: 401,
 					data: null,
-					error: "User not found",
+					error: "Unauthorized",
 				};
 			}
 
@@ -326,21 +339,12 @@ export default class DbModel {
 		groupId: string,
 	): Promise<Result<{ id: string }>> {
 		try {
-			const account = await this.collection.account.findOne({ id: accountId });
-			if (!account) {
-				return {
-					statusCode: 400,
-					data: null,
-					error: "Account not found",
-				};
-			}
-
-			const user = await this.collection.user.findOne({ id: account.userId });
+			const user = await this.fetchUserFromAccountId(accountId);
 			if (!user) {
 				return {
-					statusCode: 400,
+					statusCode: 401,
 					data: null,
-					error: "User not found",
+					error: "Unauthorized",
 				};
 			}
 
@@ -423,23 +427,12 @@ export default class DbModel {
 
 	public async joinGroup(accountId: string, groupId: string): Promise<Result> {
 		try {
-			const account = await this.collection.account.findOne({ id: accountId });
-			if (!account) {
-				return {
-					statusCode: 400,
-					data: null,
-					error: "Account not found",
-				};
-			}
-
-			const user = await this.collection.user.findOne({
-				id: account.userId,
-			});
+			const user = await this.fetchUserFromAccountId(accountId);
 			if (!user) {
 				return {
-					statusCode: 400,
+					statusCode: 401,
 					data: null,
-					error: "User not found",
+					error: "Unauthorized",
 				};
 			}
 
@@ -473,30 +466,19 @@ export default class DbModel {
 		ids: string[],
 	): Promise<Result<User[]>> {
 		try {
-			const account = await this.collection.account.findOne({ id: accountId });
-			if (!account) {
-				return {
-					statusCode: 400,
-					data: null,
-					error: "Account not found",
-				};
-			}
-
-			const user = await this.collection.user.findOne({
-				id: account.userId,
-			});
+			const user = await this.fetchUserFromAccountId(accountId);
 			if (!user) {
 				return {
-					statusCode: 400,
+					statusCode: 401,
 					data: null,
-					error: "User not found",
+					error: "Unauthorized",
 				};
 			}
 
 			const usersWithObjectId = await this.collection.user
 				.find({ id: { $in: ids } })
 				.toArray();
-			const users: User[] = mapToUser(usersWithObjectId, true);
+			const users: User[] = mapToUsers(usersWithObjectId, true);
 
 			return {
 				statusCode: 200,
@@ -508,6 +490,29 @@ export default class DbModel {
 				data: null,
 				error: `${error}`,
 			};
+		}
+	}
+
+	private async fetchUserFromAccountId(
+		accountId: string,
+	): Promise<User | null> {
+		try {
+			const account = await this.collection.account.findOne({ id: accountId });
+			if (!account) {
+				return null;
+			}
+
+			const user = await this.collection.user.findOne({
+				id: account.userId,
+			});
+			if (!user) {
+				return null;
+			}
+
+			return mapToUser(user);
+		} catch (error) {
+			console.error(error);
+			return null;
 		}
 	}
 }

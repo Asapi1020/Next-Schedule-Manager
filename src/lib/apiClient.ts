@@ -82,13 +82,8 @@ export async function fetchUserNames(accessToken: string, usersId: string[]) {
 	return response;
 }
 
-// FIXME: quit receiving userId because client can cheat. Use fetched accountId instead
-export async function changeUserName(
-	accessToken: string,
-	userId: string,
-	newName: string,
-) {
-	const url = apiUrl("/changeUserName");
+export async function changeUserName(accessToken: string, newName: string) {
+	const url = apiUrl("/user/changeName");
 
 	// eslint-disable-next-line n/no-unsupported-features/node-builtins
 	const response = await fetch(url.toString(), {
@@ -98,7 +93,6 @@ export async function changeUserName(
 			Authorization: `Bearer ${accessToken}`,
 		},
 		body: JSON.stringify({
-			userId,
 			newName,
 		}),
 	});
@@ -106,12 +100,8 @@ export async function changeUserName(
 	return response;
 }
 
-export async function addNewGroup(
-	accessToken: string,
-	userId: string,
-	groupName: string,
-) {
-	const url = apiUrl("/addNewGroup");
+export async function addNewGroup(accessToken: string, groupName: string) {
+	const url = apiUrl("/group/new");
 
 	// eslint-disable-next-line n/no-unsupported-features/node-builtins
 	const response = await fetch(url.toString(), {
@@ -121,7 +111,6 @@ export async function addNewGroup(
 			Authorization: `Bearer ${accessToken}`,
 		},
 		body: JSON.stringify({
-			userId,
 			groupName,
 		}),
 	});

@@ -40,17 +40,22 @@ export function mapToBaseSchedulesInfo(
 	});
 }
 
-export function mapToUser(
+export function mapToUsers(
 	results: WithId<Document>[],
-	WithoutGroupsId = false,
+	withoutGroupsId = false,
 ): User[] {
-	return results.map((result) => {
-		return {
-			id: result.id,
-			name: result.name,
-			groupsId: WithoutGroupsId ? [] : result.groupsId,
-		};
-	});
+	return results.map((result) => mapToUser(result, withoutGroupsId));
+}
+
+export function mapToUser(
+	result: WithId<Document>,
+	withoutGroupsId = false,
+): User {
+	return {
+		id: result.id,
+		name: result.name,
+		groupsId: withoutGroupsId ? [] : result.groupsId,
+	};
 }
 
 export function ensureGroup(group: Group): Group {
