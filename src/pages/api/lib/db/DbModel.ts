@@ -6,6 +6,7 @@ import {
 	mapToAccount,
 	mapToBaseGroupsInfo,
 	mapToBaseSchedulesInfo,
+	mapToUser,
 } from "./mapper";
 
 import Result from "@/lib/Result";
@@ -470,7 +471,7 @@ export default class DbModel {
 	public async fetchUserNames(
 		accountId: string,
 		ids: string[],
-	): Promise<Result<{ names: string[] }>> {
+	): Promise<Result<User[]>> {
 		try {
 			const account = await this.collection.account.findOne({ id: accountId });
 			if (!account) {
@@ -492,14 +493,14 @@ export default class DbModel {
 				};
 			}
 
-			const users = await this.collection.user
+			const usersWithObjectId = await this.collection.user
 				.find({ id: { $in: ids } })
 				.toArray();
-			const names = users.map((user) => user?.name ?? "Error");
+			const users: User[] = mapToUser(usersWithObjectId, true);
 
 			return {
 				statusCode: 200,
-				data: { names },
+				data: users,
 			};
 		} catch (error) {
 			return {

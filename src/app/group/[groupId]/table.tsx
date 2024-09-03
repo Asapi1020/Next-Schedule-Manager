@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import { fetchUserNames } from "@/lib/apiClient";
 import { getAccessToken } from "@/lib/dataUtils";
-import { Availability, BaseScheduleInfo } from "@/lib/schema";
+import { Availability, BaseScheduleInfo, User } from "@/lib/schema";
 
 interface TableTemplate {
 	scheduleData: BaseScheduleInfo[];
@@ -12,7 +12,7 @@ interface TableTemplate {
 const Table: React.FC<TableTemplate> = ({ scheduleData, deltaMonth }) => {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [isError, setIsError] = useState<boolean>(false);
-	const [userNames, setUserNames] = useState<string[]>([]);
+	const [users, setUsers] = useState<User[]>([]);
 	const accessToken = getAccessToken();
 
 	useEffect(() => {
@@ -22,8 +22,8 @@ const Table: React.FC<TableTemplate> = ({ scheduleData, deltaMonth }) => {
 				const usersId = scheduleData.map((datum) => datum.userId);
 				const response = await fetchUserNames(accessToken, usersId);
 				if (response.status === 200) {
-					const { names: fetchedNames } = await response.json();
-					setUserNames(fetchedNames);
+					const fetchedUsers = await response.json();
+					setUsers(fetchedUsers);
 					return;
 				} else {
 					const { error } = await response.json();
@@ -42,6 +42,11 @@ const Table: React.FC<TableTemplate> = ({ scheduleData, deltaMonth }) => {
 		fetchUserNamesData();
 	}, []);
 
+	const convertIdToName = (id: string): string => {
+		const targetUser = users.find((user) => user.id === id);
+		return targetUser?.name ?? "N/A";
+	};
+
 	return (
 		<div>
 			<p>alpha版につき即時反映なし。予定保存直後の場合リロードしてくれい</p>
@@ -55,9 +60,7 @@ const Table: React.FC<TableTemplate> = ({ scheduleData, deltaMonth }) => {
 									? "Error"
 									: isLoading
 										? "Loading..."
-										: userNames && userNames.length > index
-											? userNames[index]
-											: "N/A"}
+										: convertIdToName(data.userId)}
 							</th>
 						))}
 					</tr>
