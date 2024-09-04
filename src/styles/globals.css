@@ -33,4 +33,7 @@ body {
   .header {
     @apply sticky top-0 flex items-center justify-between p-4 border-b border-gray-300;
   }
+  .footer {
+    @apply mt-auto text-white flex justify-between items-center p-4 px-8;
+  }
 }
