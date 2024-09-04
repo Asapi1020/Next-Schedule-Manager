@@ -51,7 +51,7 @@ const groupPage = () => {
 					const fetchedData: GroupWithSchedules = await response.json();
 					const fixedData: GroupWithSchedules = {
 						...fetchedData,
-						scheduleData: fixSchedules(fetchedData.scheduleData),
+						scheduleData: fixSchedules(fetchedData.scheduleData, userInfo?.id),
 					};
 					setGroupSchedules(fixedData);
 

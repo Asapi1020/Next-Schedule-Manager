@@ -43,7 +43,20 @@ export const fixSchedule = (
 	return fixedSchedule;
 };
 
-export const fixSchedules = (scheduleData: BaseScheduleInfo[]) => {
+export const fixSchedules = (
+	scheduleData: BaseScheduleInfo[],
+	userId: string | undefined,
+) => {
+	if (
+		!scheduleData.some((datum) => datum.userId === userId) &&
+		typeof userId === "string"
+	) {
+		scheduleData.push({
+			userId,
+			schedules: [],
+		});
+	}
+
 	return scheduleData.map((scheduleDatum: BaseScheduleInfo) => {
 		scheduleDatum.schedules = fixSchedule(scheduleDatum.schedules);
 		return scheduleDatum;
