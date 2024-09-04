@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 
-import { fetchUserNames } from "@/lib/apiClient";
-import { getAccessToken } from "@/lib/dataUtils";
 import { Availability, BaseScheduleInfo, User } from "@/lib/schema";
 
 interface TableTemplate {
@@ -9,6 +7,7 @@ interface TableTemplate {
 	scheduleData: BaseScheduleInfo[];
 	selections: Availability[];
 	deltaMonth: number;
+	users: User[];
 }
 
 const Table: React.FC<TableTemplate> = ({
@@ -16,42 +15,11 @@ const Table: React.FC<TableTemplate> = ({
 	scheduleData,
 	selections,
 	deltaMonth,
+	users,
 }) => {
-	const [isLoading, setIsLoading] = useState<boolean>(false);
-	const [isError, setIsError] = useState<boolean>(false);
-	const [users, setUsers] = useState<User[]>([]);
-	const accessToken = getAccessToken();
-
-	useEffect(() => {
-		const fetchUserNamesData = async () => {
-			setIsLoading(true);
-			try {
-				const usersId = scheduleData.map((datum) => datum.userId);
-				const response = await fetchUserNames(accessToken, usersId);
-				if (response.status === 200) {
-					const fetchedUsers = await response.json();
-					setUsers(fetchedUsers);
-					return;
-				} else {
-					const { error } = await response.json();
-					setIsError(true);
-					console.error(error);
-					return;
-				}
-			} catch (error) {
-				console.error(error);
-				setIsError(true);
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		fetchUserNamesData();
-	}, []);
-
 	const convertIdToName = (id: string): string => {
 		const targetUser = users.find((user) => user.id === id);
-		return targetUser?.name ?? "N/A";
+		return targetUser?.name ?? "Loading";
 	};
 
 	const getProperAvailability = (datum: BaseScheduleInfo, index: number) => {
@@ -62,18 +30,13 @@ const Table: React.FC<TableTemplate> = ({
 
 	return (
 		<div>
-			<p>alpha版につき即時反映なし。予定保存直後の場合リロードしてくれい</p>
 			<table className=" text-white bg-black border border-gray-700">
 				<thead>
 					<tr className="bg-gray-800">
 						<th className="w-12 px-4 py-2 text-center">Date</th>
 						{scheduleData.map((data, index) => (
 							<th key={index} className="px-4 py-2 text-left">
-								{isError
-									? "Error"
-									: isLoading
-										? "Loading..."
-										: convertIdToName(data.userId)}
+								{convertIdToName(data.userId)}
 							</th>
 						))}
 					</tr>
