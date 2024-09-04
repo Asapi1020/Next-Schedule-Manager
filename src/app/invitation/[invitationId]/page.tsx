@@ -6,20 +6,18 @@ import { useEffect, useState } from "react";
 import { LoadingCircle } from "@/components/LoadingCircle";
 import { LoginButton } from "@/components/LoginButton";
 import {
-	fetchInvitationDescription,
+	fetchInvitationGroup,
 	fetchUserInfo,
 	joinGroup,
 } from "@/lib/apiClient";
 import { getAccessToken } from "@/lib/dataUtils";
-import { InvitationDescription, UserProfile } from "@/lib/schema";
+import { BaseGroupInfo, UserProfile } from "@/lib/schema";
 import { safeLoadParam } from "@/lib/utils";
 
 const invitationPage = () => {
 	const accessToken = getAccessToken();
 	const invitationId = safeLoadParam("invitationId");
-	const [description, setDescription] = useState<InvitationDescription | null>(
-		null,
-	);
+	const [groupInfo, setGroupInfo] = useState<BaseGroupInfo | null>(null);
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const router = useRouter();
 
@@ -42,24 +40,22 @@ const invitationPage = () => {
 		const fetchGroupId = async () => {
 			setIsLoading(true);
 			try {
-				const response = await fetchInvitationDescription(invitationId);
+				const response = await fetchInvitationGroup(invitationId);
 
 				if (response.status === 200) {
-					const fetchedDescription = await response.json();
-					setDescription(fetchedDescription);
+					const fetchedGroupInfo = await response.json();
+					setGroupInfo(fetchedGroupInfo);
 
-					const bAlreadyJoined = await checkAlreadyJoined(
-						fetchedDescription.groupId,
-					);
+					const bAlreadyJoined = await checkAlreadyJoined(fetchedGroupInfo.id);
 					if (bAlreadyJoined) {
-						router.push(`/group/${fetchedDescription.groupId}`);
+						router.push(`/group/${fetchedGroupInfo.id}`);
 					}
 				} else {
 					const { error } = await response.json();
 					console.error(error);
 				}
 			} catch (error) {
-				setDescription(null);
+				setGroupInfo(null);
 				console.error(error);
 			} finally {
 				setIsLoading(false);
@@ -73,7 +69,7 @@ const invitationPage = () => {
 		return <LoadingCircle />;
 	}
 
-	if (!description) {
+	if (!groupInfo) {
 		return (
 			<div className="flex flex-col items-center justify-center min-h-screen">
 				<p className="text-lg text-gray-700 mb-8">Error: Invalid invitation.</p>
@@ -83,10 +79,10 @@ const invitationPage = () => {
 
 	const handleJoinGroupClick = async () => {
 		try {
-			const response = await joinGroup(accessToken, description.groupId);
+			const response = await joinGroup(accessToken, groupInfo.id);
 
 			if (response.status === 200) {
-				router.push(`/group/${description.groupId}`);
+				router.push(`/group/${groupInfo.id}`);
 			} else {
 				const { error } = await response.json();
 				console.error(error);
@@ -98,7 +94,7 @@ const invitationPage = () => {
 
 	return (
 		<div className="flex flex-col items-center justify-center min-h-screen">
-			<h1 className="text-4xl font-bold mb-4">Join {description.groupName}!</h1>
+			<h1 className="text-4xl font-bold mb-4">Join {groupInfo.name}!</h1>
 			{accessToken ? (
 				<button
 					onClick={handleJoinGroupClick}

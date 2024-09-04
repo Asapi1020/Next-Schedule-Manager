@@ -19,8 +19,8 @@ export async function signInWithDiscord(code: string) {
 	return response;
 }
 
-export async function fetchInvitationDescription(invitationId: string) {
-	const url = apiUrl(`/invitation/${invitationId}/description`);
+export async function fetchInvitationGroup(invitationId: string) {
+	const url = apiUrl(`/invitation/${invitationId}/group`);
 
 	// eslint-disable-next-line n/no-unsupported-features/node-builtins
 	const response = await fetch(url.toString(), {

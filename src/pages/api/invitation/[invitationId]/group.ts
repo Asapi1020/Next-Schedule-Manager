@@ -17,7 +17,7 @@ export default async function handler(
 		return res.status(400).json({ error: "Bad Request" });
 	}
 
-	const fetchIdResult = await dbModel.fetchInvitationDescription(invitationId);
+	const fetchIdResult = await dbModel.fetchInvitationGroup(invitationId);
 	if (fetchIdResult.statusCode !== 200) {
 		return res.status(fetchIdResult.statusCode).json({
 			error: fetchIdResult.error,

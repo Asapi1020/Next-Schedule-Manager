@@ -18,7 +18,7 @@ import {
 	Group,
 	GroupWithSchedules,
 	Invitation,
-	InvitationDescription,
+	BaseGroupInfo,
 	MonthlySchedule,
 	Schedule,
 	User,
@@ -396,9 +396,9 @@ export default class DbModel {
 		}
 	}
 
-	public async fetchInvitationDescription(
+	public async fetchInvitationGroup(
 		invitationId: string,
-	): Promise<Result<InvitationDescription>> {
+	): Promise<Result<BaseGroupInfo>> {
 		try {
 			const invitation = await this.collection.invitation.findOne({
 				id: invitationId,
@@ -424,8 +424,9 @@ export default class DbModel {
 			return {
 				statusCode: 200,
 				data: {
-					groupId,
-					groupName: group.name,
+					id: group.id,
+					name: group.name,
+					adminId: group.adminId,
 				},
 			};
 		} catch (error) {
