@@ -84,6 +84,22 @@ const groupPage = () => {
 		setSelections(targetSelections);
 	}, [groupSchedules, deltaMonth]);
 
+	useEffect(() => {
+		if (!groupSchedules || !userInfo) {
+			return;
+		}
+
+		if (!userInfo.groups.some((group) => group.id === groupSchedules.id)) {
+			const newUserInfo = { ...userInfo };
+			newUserInfo.groups.push({
+				id: groupSchedules.id,
+				name: groupSchedules.name,
+				adminId: groupSchedules.adminId,
+			});
+			setUserInfo(newUserInfo);
+		}
+	}, [groupSchedules, userInfo]);
+
 	if (loading || !groupSchedules) {
 		return (
 			<div className="flex justify-center items-center container mx-auto p-4">
