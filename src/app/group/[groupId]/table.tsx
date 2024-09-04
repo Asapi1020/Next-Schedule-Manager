@@ -5,11 +5,18 @@ import { getAccessToken } from "@/lib/dataUtils";
 import { Availability, BaseScheduleInfo, User } from "@/lib/schema";
 
 interface TableTemplate {
+	userId: string;
 	scheduleData: BaseScheduleInfo[];
+	selections: Availability[];
 	deltaMonth: number;
 }
 
-const Table: React.FC<TableTemplate> = ({ scheduleData, deltaMonth }) => {
+const Table: React.FC<TableTemplate> = ({
+	userId,
+	scheduleData,
+	selections,
+	deltaMonth,
+}) => {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const [isError, setIsError] = useState<boolean>(false);
 	const [users, setUsers] = useState<User[]>([]);
@@ -47,6 +54,12 @@ const Table: React.FC<TableTemplate> = ({ scheduleData, deltaMonth }) => {
 		return targetUser?.name ?? "N/A";
 	};
 
+	const getProperAvailability = (datum: BaseScheduleInfo, index: number) => {
+		return userId === datum.userId
+			? selections[index]
+			: datum.schedules[deltaMonth].availabilities[index];
+	};
+
 	return (
 		<div>
 			<p>alpha版につき即時反映なし。予定保存直後の場合リロードしてくれい</p>
@@ -72,9 +85,9 @@ const Table: React.FC<TableTemplate> = ({ scheduleData, deltaMonth }) => {
 								<td className="w-12 px-4 py-2 text-right">{index + 1}</td>
 								{scheduleData.map((datum) => (
 									<td
-										className={`px-4 py-2 ${getBackgroundColorClass(datum.schedules[deltaMonth].availabilities[index])}`}
+										className={`px-4 py-2 ${getBackgroundColorClass(getProperAvailability(datum, index))}`}
 									>
-										{datum.schedules[deltaMonth].availabilities[index]}
+										{getProperAvailability(datum, index)}
 									</td>
 								))}
 							</tr>
