@@ -184,7 +184,9 @@ const groupPage = () => {
 					/>
 				) : (
 					<Table
+						userId={userInfo.id}
 						scheduleData={groupSchedules.scheduleData}
+						selections={selections}
 						deltaMonth={deltaMonth}
 					></Table>
 				)}
