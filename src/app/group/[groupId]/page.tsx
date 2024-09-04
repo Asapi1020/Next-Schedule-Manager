@@ -8,7 +8,11 @@ import Calendar from "./calendar";
 import Table from "./table";
 
 import { LoadingCircle } from "@/components/LoadingCircle";
-import { createInvitationLink, fetchGroupSchedules } from "@/lib/apiClient";
+import {
+	createInvitationLink,
+	fetchGroupSchedules,
+	fetchUserNames,
+} from "@/lib/apiClient";
 import authEffect from "@/lib/authEffect";
 import { getAccessToken, useUserContext } from "@/lib/dataUtils";
 import {
@@ -21,6 +25,7 @@ import {
 	Availability,
 	GroupWithSchedules,
 	MonthlySchedule,
+	User,
 } from "@/lib/schema";
 import { safeLoadParam } from "@/lib/utils";
 
@@ -34,6 +39,7 @@ const groupPage = () => {
 
 	const [schedules, setSchedules] = useState<MonthlySchedule[]>([]);
 	const [selections, setSelections] = useState<Availability[]>([]);
+	const [users, setUsers] = useState<User[]>([]);
 
 	const accessToken = getAccessToken();
 
@@ -74,6 +80,35 @@ const groupPage = () => {
 
 		fetchGroupSchedulesData();
 	}, []);
+
+	useEffect(() => {
+		const fetchUserNamesData = async () => {
+			try {
+				if (!groupSchedules) {
+					return;
+				}
+
+				const usersId = groupSchedules.scheduleData.map(
+					(datum) => datum.userId,
+				);
+				const response = await fetchUserNames(accessToken, usersId);
+
+				if (response.status === 200) {
+					const fetchedUsers = await response.json();
+					setUsers(fetchedUsers);
+					return;
+				} else {
+					const { error } = await response.json();
+					console.error(error);
+					return;
+				}
+			} catch (error) {
+				console.error(error);
+			}
+		};
+
+		fetchUserNamesData();
+	}, [groupSchedules]);
 
 	useEffect(() => {
 		const targetSelections = findMonthlySchedule(
@@ -204,6 +239,7 @@ const groupPage = () => {
 						scheduleData={groupSchedules.scheduleData}
 						selections={selections}
 						deltaMonth={deltaMonth}
+						users={users}
 					></Table>
 				)}
 			</div>
