@@ -76,11 +76,10 @@ const groupPage = () => {
 	}, []);
 
 	useEffect(() => {
-		const targetToday = dayjs().add(deltaMonth, "month");
 		const targetSelections = findMonthlySchedule(
 			schedules,
-			targetToday.year(),
-			targetToday.month(),
+			today.add(deltaMonth, "month").year(),
+			today.add(deltaMonth, "month").month(),
 		);
 		setSelections(targetSelections);
 	}, [groupSchedules, deltaMonth]);
