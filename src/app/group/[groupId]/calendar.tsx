@@ -7,7 +7,7 @@ import { Dispatch, SetStateAction, useState } from "react";
 
 import PlayButton from "@/components/PlayButton";
 import SaveButton from "@/components/SaveButton";
-import { saveSchedules } from "@/lib/apiClient";
+import { saveSchedules } from "@/lib/apiClient/post";
 import { getAccessToken } from "@/lib/dataUtils";
 import { Availability, MonthlySchedule } from "@/lib/schema";
 import { safeLoadParam } from "@/lib/utils";

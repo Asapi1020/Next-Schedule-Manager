@@ -12,7 +12,7 @@ import {
 
 import CancelButton from "@/components/CancelButton";
 import SaveButton from "@/components/SaveButton";
-import { addNewGroup } from "@/lib/apiClient";
+import { addNewGroup } from "@/lib/apiClient/post";
 import { OWN_GROUP_LIMIT } from "@/lib/config";
 import { useGroupContext } from "@/lib/dataUtils";
 import { Group, UserProfile } from "@/lib/schema";

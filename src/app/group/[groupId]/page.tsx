@@ -8,11 +8,8 @@ import Calendar from "./calendar";
 import Table from "./table";
 
 import { LoadingCircle } from "@/components/LoadingCircle";
-import {
-	createInvitationLink,
-	fetchGroupSchedules,
-	fetchUserNames,
-} from "@/lib/apiClient";
+import { fetchGroupSchedules, fetchUserNames } from "@/lib/apiClient/get";
+import { createInvitationLink } from "@/lib/apiClient/post";
 import authEffect from "@/lib/authEffect";
 import { getAccessToken, useUserContext } from "@/lib/dataUtils";
 import {

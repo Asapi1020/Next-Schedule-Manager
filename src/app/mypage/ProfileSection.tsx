@@ -7,7 +7,7 @@ import React, { Dispatch, SetStateAction, useState } from "react";
 
 import CancelButton from "@/components/CancelButton";
 import SaveButton from "@/components/SaveButton";
-import { changeUserName } from "@/lib/apiClient";
+import { changeUserName } from "@/lib/apiClient/post";
 import { UserProfile } from "@/lib/schema";
 
 interface ProfileTemplate {

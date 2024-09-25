@@ -5,11 +5,8 @@ import { useEffect, useState } from "react";
 
 import { LoadingCircle } from "@/components/LoadingCircle";
 import { LoginButton } from "@/components/LoginButton";
-import {
-	fetchInvitationGroup,
-	fetchUserInfo,
-	joinGroup,
-} from "@/lib/apiClient";
+import { fetchInvitationGroup, fetchUserInfo } from "@/lib/apiClient/get";
+import { joinGroup } from "@/lib/apiClient/post";
 import { getAccessToken } from "@/lib/dataUtils";
 import { BaseGroupInfo, UserProfile } from "@/lib/schema";
 import { safeLoadParam } from "@/lib/utils";
