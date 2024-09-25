@@ -1,4 +1,4 @@
-import { MonthlySchedule } from "../schema";
+import { MonthlySchedule } from "../lib/schema";
 
 import { apiUrl } from "./utils";
 

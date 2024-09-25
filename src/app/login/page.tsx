@@ -3,8 +3,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { useCookies } from "react-cookie";
 
+import { signInWithDiscord } from "@/apiClient/get";
 import { LoadingCircle } from "@/components/LoadingCircle";
-import { signInWithDiscord } from "@/lib/apiClient/get";
 import { getCookieValue } from "@/lib/dataUtils";
 
 function ObtainLogin() {

@@ -5,9 +5,9 @@ import EditSquare from "@public/edit.svg";
 import Image from "next/image";
 import React, { Dispatch, SetStateAction, useState } from "react";
 
+import { changeUserName } from "@/apiClient/post";
 import CancelButton from "@/components/CancelButton";
 import SaveButton from "@/components/SaveButton";
-import { changeUserName } from "@/lib/apiClient/post";
 import { UserProfile } from "@/lib/schema";
 
 interface ProfileTemplate {

@@ -5,19 +5,14 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import Calendar from "./calendar";
+import { findMonthlySchedule, findMySchedule, fixSchedules } from "./handler";
 import Table from "./table";
 
+import { fetchGroupSchedules, fetchUserNames } from "@/apiClient/get";
+import { createInvitationLink } from "@/apiClient/post";
 import { LoadingCircle } from "@/components/LoadingCircle";
-import { fetchGroupSchedules, fetchUserNames } from "@/lib/apiClient/get";
-import { createInvitationLink } from "@/lib/apiClient/post";
 import authEffect from "@/lib/authEffect";
 import { getAccessToken, useUserContext } from "@/lib/dataUtils";
-import {
-	createDefaultAvailability,
-	findMySchedule,
-	findSchedule,
-	fixSchedules,
-} from "@/lib/scheduleUtils";
 import {
 	Availability,
 	GroupWithSchedules,
@@ -245,15 +240,3 @@ const groupPage = () => {
 };
 
 export default groupPage;
-
-const findMonthlySchedule = (
-	schedules: MonthlySchedule[],
-	year: number,
-	month: number,
-): Availability[] => {
-	const targetSchedule = findSchedule(schedules, year, month);
-
-	return (
-		targetSchedule?.availabilities || createDefaultAvailability(year, month)
-	);
-};

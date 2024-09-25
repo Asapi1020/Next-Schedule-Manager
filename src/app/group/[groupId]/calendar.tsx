@@ -5,9 +5,11 @@ import dayjs from "dayjs";
 import Image from "next/image";
 import { Dispatch, SetStateAction, useState } from "react";
 
+import { updateAvailabilities } from "./handler";
+
+import { saveSchedules } from "@/apiClient/post";
 import PlayButton from "@/components/PlayButton";
 import SaveButton from "@/components/SaveButton";
-import { saveSchedules } from "@/lib/apiClient/post";
 import { getAccessToken } from "@/lib/dataUtils";
 import { Availability, MonthlySchedule } from "@/lib/schema";
 import { safeLoadParam } from "@/lib/utils";
@@ -193,21 +195,6 @@ const Calendar: React.FC<CalendarTemplate> = ({
 			</div>
 		</div>
 	);
-};
-
-const updateAvailabilities = (
-	schedules: MonthlySchedule[],
-	newSchedule: MonthlySchedule,
-): MonthlySchedule[] => {
-	return schedules.map((schedule: MonthlySchedule) => {
-		if (
-			schedule.year === newSchedule.year &&
-			schedule.month === newSchedule.month
-		) {
-			return { ...schedule, availabilities: newSchedule.availabilities };
-		}
-		return schedule;
-	});
 };
 
 export default Calendar;

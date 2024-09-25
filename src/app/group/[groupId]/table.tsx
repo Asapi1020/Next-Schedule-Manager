@@ -1,5 +1,7 @@
 import React from "react";
 
+import { getBackgroundColorClass } from "./handler";
+
 import { Availability, BaseScheduleInfo, User } from "@/lib/schema";
 
 interface TableTemplate {
@@ -60,23 +62,6 @@ const Table: React.FC<TableTemplate> = ({
 			</table>
 		</div>
 	);
-};
-
-const getBackgroundColorClass = (text: string) => {
-	switch (text as Availability) {
-		case "〇": {
-			return "bg-green-600";
-		}
-		case "△": {
-			return "bg-yellow-600";
-		}
-		case "×": {
-			return "bg-red-600";
-		}
-		default: {
-			return "";
-		}
-	}
 };
 
 export default Table;
