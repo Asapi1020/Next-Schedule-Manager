@@ -32,7 +32,7 @@ export async function fetchInvitationGroup(invitationId: string) {
 }
 
 export async function fetchUserInfo(accessToken: string) {
-	const url = apiUrl("/fetchUserInfo");
+	const url = apiUrl("/user/myProfile");
 	return await get(url, { Authorization: `Bearer ${accessToken}` });
 }
 
@@ -40,7 +40,7 @@ export async function fetchGroupSchedules(
 	accessToken: string,
 	groupId: string,
 ) {
-	const url = apiUrl(`/fetchGroupSchedules/${groupId}`);
+	const url = apiUrl(`/group/${groupId}/schedules`);
 	return await get(url, { Authorization: `Bearer ${accessToken}` });
 }
 

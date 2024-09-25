@@ -44,7 +44,7 @@ export async function saveSchedules(
 	groupId: string,
 	schedules: MonthlySchedule[],
 ) {
-	const url = apiUrl("/saveSchedules");
+	const url = apiUrl("/schedules");
 	return await post(url, accessToken, { groupId, schedules });
 }
 
