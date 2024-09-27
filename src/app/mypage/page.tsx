@@ -27,7 +27,7 @@ const MyPage = () => {
 
 	if (!userInfo) {
 		return (
-			<div className="container mx-auto p-4">Failed to fetch Info info</div>
+			<div className="container mx-auto p-4">Failed to fetch user info</div>
 		);
 	}
 

@@ -2,20 +2,14 @@
 
 import React, { createContext, ReactNode, useEffect, useState } from "react";
 
-import { Group, UserProfile } from "@/lib/schema";
+import { UserProfile } from "@/lib/schema";
 
 interface UserContextType {
 	userInfo: UserProfile | null;
 	setUserInfo: React.Dispatch<React.SetStateAction<UserProfile | null>>;
 }
 
-interface GroupContextType {
-	groupInfo: Group | null;
-	setGroupInfo: React.Dispatch<React.SetStateAction<Group | null>>;
-}
-
 export const UserContext = createContext<UserContextType | null>(null);
-export const GroupContext = createContext<GroupContextType | null>(null);
 
 function UserProvider({ children }: { children: ReactNode }) {
 	const [userInfo, setUserInfo] = useState<UserProfile | null>(() => {
@@ -41,30 +35,6 @@ function UserProvider({ children }: { children: ReactNode }) {
 	);
 }
 
-function GroupProvider({ children }: { children: ReactNode }) {
-	const [groupInfo, setGroupInfo] = useState<Group | null>(() => {
-		if (typeof window !== "undefined") {
-			const savedGroupInfo = localStorage.getItem("groupInfo");
-			return savedGroupInfo ? JSON.parse(savedGroupInfo) : null;
-		}
-		return null;
-	});
-
-	useEffect(() => {
-		if (groupInfo) {
-			localStorage.setItem("groupInfo", JSON.stringify(groupInfo));
-		} else {
-			localStorage.removeItem("groupInfo");
-		}
-	}, [groupInfo]);
-
-	return (
-		<GroupContext.Provider value={{ groupInfo, setGroupInfo }}>
-			{children}
-		</GroupContext.Provider>
-	);
-}
-
 export default function DataProvider({ children }: { children: ReactNode }) {
 	const [isClient, setIsClient] = useState(false);
 
@@ -76,9 +46,5 @@ export default function DataProvider({ children }: { children: ReactNode }) {
 		return null;
 	}
 
-	return (
-		<UserProvider>
-			<GroupProvider>{children}</GroupProvider>
-		</UserProvider>
-	);
+	return <UserProvider>{children}</UserProvider>;
 }

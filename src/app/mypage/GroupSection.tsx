@@ -14,7 +14,6 @@ import { addNewGroup } from "@/apiClient/post";
 import CancelButton from "@/components/CancelButton";
 import SaveButton from "@/components/SaveButton";
 import { OWN_GROUP_LIMIT } from "@/lib/config";
-import { useGroupContext } from "@/lib/dataUtils";
 import { Group, UserProfile } from "@/lib/schema";
 
 interface GroupTemplate {
@@ -28,7 +27,6 @@ const GroupSection: React.FC<GroupTemplate> = ({
 	userInfo,
 	setUserInfo,
 }) => {
-	const [, setGroupInfo] = useGroupContext();
 	const [isEditing, setIsEditing] = useState<boolean>(false);
 	const [name, setName] = useState<string>("");
 	const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -65,7 +63,6 @@ const GroupSection: React.FC<GroupTemplate> = ({
 
 			if (response.status === 200) {
 				const newGroupInfo: Group = await response.json();
-				setGroupInfo(newGroupInfo);
 
 				const usersGroups = userInfo.groups;
 				usersGroups.push({
@@ -152,9 +149,9 @@ const GroupSection: React.FC<GroupTemplate> = ({
 			)}
 			{userInfo.groups.length > 0 ? (
 				<div className="grid grid-cols-1 gap-4">
-					{userInfo.groups.map((group, index) => (
+					{userInfo.groups.map((group) => (
 						<div
-							key={index}
+							key={group.id}
 							className="bg-gray-700 rounded-lg p-4 shadow hover:shadow-lg transition-shadow duration-300"
 						>
 							<a

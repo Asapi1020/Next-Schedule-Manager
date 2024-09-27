@@ -46,7 +46,10 @@ const Table: React.FC<TableTemplate> = ({
 				<tbody>
 					{scheduleData[0].schedules[deltaMonth].availabilities.map(
 						(availability, index) => (
-							<tr key={index} className="border-t border-gray-700">
+							<tr
+								key={`${deltaMonth}-${index}`}
+								className="border-t border-gray-700"
+							>
 								<td className="w-12 px-4 py-2 text-right">{index + 1}</td>
 								{scheduleData.map((datum) => (
 									<td

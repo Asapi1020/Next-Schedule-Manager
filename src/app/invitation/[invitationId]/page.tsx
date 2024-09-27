@@ -11,7 +11,7 @@ import { getAccessToken } from "@/lib/dataUtils";
 import { BaseGroupInfo, UserProfile } from "@/lib/schema";
 import { safeLoadParam } from "@/lib/utils";
 
-const invitationPage = () => {
+const InvitationPage = () => {
 	const accessToken = getAccessToken();
 	const invitationId = safeLoadParam("invitationId");
 	const [groupInfo, setGroupInfo] = useState<BaseGroupInfo | null>(null);
@@ -60,7 +60,7 @@ const invitationPage = () => {
 		};
 
 		fetchGroupId();
-	}, []);
+	}, [accessToken, invitationId]);
 
 	if (isLoading) {
 		return <LoadingCircle />;
@@ -69,7 +69,9 @@ const invitationPage = () => {
 	if (!groupInfo) {
 		return (
 			<div className="flex flex-col items-center justify-center min-h-screen">
-				<p className="text-lg text-gray-700 mb-8">Error: Invalid invitation.</p>
+				<p className="text-lg text-gray-700 mb-8">
+					Error: Invalid invitation or the group does not exist.
+				</p>
 			</div>
 		);
 	}
@@ -106,4 +108,4 @@ const invitationPage = () => {
 	);
 };
 
-export default invitationPage;
+export default InvitationPage;
