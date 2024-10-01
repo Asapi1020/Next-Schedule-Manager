@@ -31,6 +31,17 @@ export async function fetchInvitationGroup(invitationId: string) {
 	return await get(url);
 }
 
+export async function fetchGroupInfo(groupId: string) {
+	const url = apiUrl(`/group/${groupId}`);
+	return await get(url);
+}
+
+export async function fetchUserNames(accessToken: string, usersId: string[]) {
+	const url = apiUrl("/user");
+	url.searchParams.append("ids", usersId.join(","));
+	return await get(url, { Authorization: `Bearer ${accessToken}` });
+}
+
 export async function fetchUserInfo(accessToken: string) {
 	const url = apiUrl("/user/myProfile");
 	return await get(url, { Authorization: `Bearer ${accessToken}` });
@@ -44,8 +55,7 @@ export async function fetchGroupSchedules(
 	return await get(url, { Authorization: `Bearer ${accessToken}` });
 }
 
-export async function fetchUserNames(accessToken: string, usersId: string[]) {
-	const url = apiUrl("/user");
-	url.searchParams.append("ids", usersId.join(","));
+export async function fetchInvitations(accessToken: string, groupId: string) {
+	const url = apiUrl(`/group/${groupId}/invitations`);
 	return await get(url, { Authorization: `Bearer ${accessToken}` });
 }

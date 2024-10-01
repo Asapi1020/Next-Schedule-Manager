@@ -60,3 +60,34 @@ export async function joinGroup(accessToken: string, groupId: string) {
 	const url = apiUrl(`/group/${groupId}/join`);
 	return await post(url, accessToken);
 }
+
+export async function changeGroupName(
+	accessToken: string,
+	groupId: string,
+	newName: string,
+) {
+	const url = apiUrl(`/group/${groupId}/changeName`);
+	return await post(url, accessToken, { newName });
+}
+
+export async function kickUser(
+	accessToken: string,
+	groupId: string,
+	userId: string,
+) {
+	const url = apiUrl(`/group/${groupId}/kickUser/${userId}`);
+	return await post(url, accessToken);
+}
+
+export async function discardInvitationLink(
+	accessToken: string,
+	invitationId: string,
+) {
+	const url = apiUrl(`/invitation/${invitationId}/discard`);
+	return await post(url, accessToken);
+}
+
+export async function deleteGroup(accessToken: string, groupId: string) {
+	const url = apiUrl(`/group/${groupId}/delete`);
+	return await post(url, accessToken);
+}

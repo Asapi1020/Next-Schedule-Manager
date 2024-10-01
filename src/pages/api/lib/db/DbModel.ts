@@ -1,5 +1,5 @@
 import { createId as cuid } from "@paralleldrive/cuid2";
-import { Db, MongoClient, PushOperator } from "mongodb";
+import { Db, MongoClient, PullOperator, PushOperator } from "mongodb";
 
 import {
 	ensureGroup,
@@ -175,6 +175,35 @@ export default class DbModel {
 			return {
 				statusCode: 200,
 				data: null,
+			};
+		} catch (error) {
+			return {
+				statusCode: 500,
+				data: null,
+				error: `${error}`,
+			};
+		}
+	}
+
+	public async fetchGroupInfo(id: string): Promise<Result<Group>> {
+		try {
+			const group = await this.collection.group.findOne({ id });
+			if (!group) {
+				return {
+					statusCode: 404,
+					data: null,
+					error: "Not found",
+				};
+			}
+
+			return {
+				statusCode: 200,
+				data: {
+					id,
+					name: group.name,
+					adminId: group.adminId,
+					usersId: group.usersId,
+				},
 			};
 		} catch (error) {
 			return {
@@ -482,6 +511,106 @@ export default class DbModel {
 		}
 	}
 
+	public async changeGroupName(
+		accountId: string,
+		groupId: string,
+		newName: string,
+	): Promise<Result<void>> {
+		try {
+			const user = await this.fetchUserFromAccountId(accountId);
+			if (!user) {
+				return {
+					statusCode: 401,
+					data: null,
+					error: "Unauthorized",
+				};
+			}
+
+			const group = await this.collection.group.findOne({ id: groupId });
+			if (!group || group.adminId !== user.id) {
+				return {
+					statusCode: 400,
+					data: null,
+					error: "Bad Request",
+				};
+			}
+
+			const updateGroup: Group = {
+				id: groupId,
+				name: newName,
+				adminId: user.id,
+				usersId: group.usersId,
+			};
+			await this.collection.group.updateOne(
+				{ id: updateGroup.id },
+				{ $set: updateGroup },
+			);
+
+			return {
+				statusCode: 200,
+				data: null,
+			};
+		} catch (error) {
+			return {
+				statusCode: 500,
+				data: null,
+				error: `Internal Server Error: ${error}`,
+			};
+		}
+	}
+
+	public async kickUser(
+		accountId: string,
+		groupId: string,
+		userIdToKick: string,
+	): Promise<Result<void>> {
+		try {
+			const admin = await this.fetchUserFromAccountId(accountId);
+			if (!admin) {
+				return {
+					statusCode: 401,
+					data: null,
+					error: "Unauthorized",
+				};
+			}
+
+			const group = await this.collection.group.findOne({ id: groupId });
+			if (!group || group.adminId !== admin.id || userIdToKick === admin.id) {
+				return {
+					statusCode: 400,
+					data: null,
+					error: "Bad Request",
+				};
+			}
+
+			await this.collection.group.updateOne(
+				{ id: groupId },
+				{ $pull: { usersId: userIdToKick } as PullOperator<Document> },
+			);
+
+			await this.collection.user.updateOne(
+				{ id: userIdToKick },
+				{ $pull: { groupsId: groupId } as PullOperator<Document> },
+			);
+
+			await this.collection.schedule.deleteOne({
+				userId: userIdToKick,
+				groupId,
+			});
+
+			return {
+				statusCode: 200,
+				data: null,
+			};
+		} catch (error) {
+			return {
+				statusCode: 500,
+				data: null,
+				error: `${error}`,
+			};
+		}
+	}
+
 	public async fetchUsers(
 		accountId: string,
 		ids: string[],
@@ -504,6 +633,135 @@ export default class DbModel {
 			return {
 				statusCode: 200,
 				data: users,
+			};
+		} catch (error) {
+			return {
+				statusCode: 500,
+				data: null,
+				error: `${error}`,
+			};
+		}
+	}
+
+	public async fetchInvitations(
+		accountId: string,
+		groupId: string,
+	): Promise<Result<string[]>> {
+		try {
+			const user = await this.fetchUserFromAccountId(accountId);
+			if (!user) {
+				return {
+					statusCode: 401,
+					data: null,
+					error: "Unauthorized",
+				};
+			}
+
+			const group = await this.collection.group.findOne({ id: groupId });
+			if (!group || group.adminId !== user.id) {
+				return {
+					statusCode: 400,
+					data: null,
+					error: "Bad Request",
+				};
+			}
+
+			const invitations = await this.collection.invitation
+				.find({ groupId })
+				.toArray();
+
+			return {
+				statusCode: 200,
+				data: invitations.map((invitation) => {
+					return invitation.id;
+				}),
+			};
+		} catch (error) {
+			return {
+				statusCode: 500,
+				data: null,
+				error: `${error}`,
+			};
+		}
+	}
+
+	public async deleteInvitation(
+		accountId: string,
+		invitationId: string,
+	): Promise<Result<void>> {
+		try {
+			const user = await this.fetchUserFromAccountId(accountId);
+			if (!user) {
+				return {
+					statusCode: 401,
+					data: null,
+					error: "Unauthorized",
+				};
+			}
+
+			const invitation = await this.collection.invitation.findOne({
+				id: invitationId,
+			});
+			if (!invitation) {
+				return {
+					statusCode: 400,
+					data: null,
+					error: "Bad Request",
+				};
+			}
+
+			const group = await this.collection.group.findOne({
+				id: invitation.groupId,
+			});
+			if (!group || group.adminId !== user.id) {
+				return {
+					statusCode: 400,
+					data: null,
+					error: "Bad Request",
+				};
+			}
+
+			await this.collection.invitation.deleteOne({ id: invitationId });
+			return {
+				statusCode: 200,
+				data: null,
+			};
+		} catch (error) {
+			return {
+				statusCode: 500,
+				data: null,
+				error: `${error}`,
+			};
+		}
+	}
+
+	public async deleteGroup(
+		accountId: string,
+		groupId: string,
+	): Promise<Result<void>> {
+		try {
+			const user = await this.fetchUserFromAccountId(accountId);
+			if (!user) {
+				return {
+					statusCode: 401,
+					data: null,
+					error: "Unauthorized",
+				};
+			}
+
+			const group = await this.collection.group.findOne({ id: groupId });
+			if (!group || group.adminId !== user.id) {
+				return {
+					statusCode: 400,
+					data: null,
+					error: "Bad Request",
+				};
+			}
+
+			await this.collection.group.deleteOne({ id: groupId });
+			return {
+				statusCode: 200,
+				data: null,
 			};
 		} catch (error) {
 			return {

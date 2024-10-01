@@ -9,7 +9,6 @@ import { findMonthlySchedule, findMySchedule, fixSchedules } from "./handler";
 import Table from "./table";
 
 import { fetchGroupSchedules, fetchUserNames } from "@/apiClient/get";
-import { createInvitationLink } from "@/apiClient/post";
 import { LoadingCircle } from "@/components/LoadingCircle";
 import authEffect from "@/lib/authEffect";
 import { getAccessToken, useUserContext } from "@/lib/dataUtils";
@@ -142,35 +141,6 @@ const groupPage = () => {
 		);
 	}
 
-	const handleCopyLink = async () => {
-		try {
-			const response = await createInvitationLink(
-				accessToken,
-				groupSchedules.id,
-			);
-			if (response.status === 200) {
-				const { id: invitationId } = await response.json();
-				const link = `${process.env.NEXT_PUBLIC_FRONTEND_ADDRESS}/invitation/${invitationId}`;
-				// eslint-disable-next-line n/no-unsupported-features/node-builtins
-				navigator.clipboard
-					.writeText(link)
-					.then(() => {
-						alert("Link copied to clipboard!");
-					})
-					.catch((error) => {
-						console.error("Failed to copy:", error);
-					});
-				return;
-			} else {
-				const { error } = await response.json();
-				alert(error);
-				return;
-			}
-		} catch (error) {
-			alert(error);
-		}
-	};
-
 	const toggleViewMode = () => {
 		setIsCalendarView(!isCalendarView);
 	};
@@ -190,12 +160,12 @@ const groupPage = () => {
 					</div>
 				</div>
 				{groupSchedules.adminId === userInfo.id && (
-					<button
+					<a
+						href={`/group/${groupId}/admin`}
 						className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-						onClick={handleCopyLink}
 					>
-						🔗 Invitation Link
-					</button>
+						Admin Page
+					</a>
 				)}
 			</div>
 
