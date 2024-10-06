@@ -2,6 +2,7 @@
 
 import CheckCircle from "@public/check-circle.svg";
 import EditSquare from "@public/edit.svg";
+import ReloadArrow from "@public/reload.svg";
 import Image from "next/image";
 import React, { Dispatch, SetStateAction, useState } from "react";
 
@@ -54,6 +55,25 @@ const ProfileSection: React.FC<ProfileTemplate> = ({
 		}
 	};
 
+	const handleReloadUserInfo = async () => {
+		setUserInfo(null);
+	};
+
+	const ReloadButton = () => {
+		return (
+			<button
+				onClick={handleReloadUserInfo}
+				className="text-white py-1 px-2 rounded border"
+			>
+				<Image
+					src={ReloadArrow}
+					alt="reload arrow path"
+					className="w-6 h-6 mr-1"
+				/>
+			</button>
+		);
+	};
+
 	const renderEditingView = () => {
 		return (
 			<div className="flex items-center justify-between">
@@ -77,19 +97,25 @@ const ProfileSection: React.FC<ProfileTemplate> = ({
 		return (
 			<div className="flex items-center justify-between">
 				<h2 className="text-2xl font-semibold p-2">{name}</h2>
-				<button
-					onClick={handleEditClick}
-					className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
-				>
-					<div className="flex items-center">
-						<Image
-							src={EditSquare}
-							alt="edit pencil square"
-							className="w-6 h-6 mr-1"
-						/>
-						Edit Profile
+				<div>
+					<div className="flex justify-between items-center mb-2">
+						<div />
+						<ReloadButton />
 					</div>
-				</button>
+					<button
+						onClick={handleEditClick}
+						className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700"
+					>
+						<div className="flex items-center">
+							<Image
+								src={EditSquare}
+								alt="edit pencil square"
+								className="w-6 h-6 mr-1"
+							/>
+							Edit Profile
+						</div>
+					</button>
+				</div>
 			</div>
 		);
 	};
